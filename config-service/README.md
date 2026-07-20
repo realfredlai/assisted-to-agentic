@@ -4,7 +4,7 @@ A full stack application consisting of a Django REST Framework (DRF) backend API
 
 ## Tech Stack
 
-- **Backend:** Python 3.14, Django 5.1, Django REST Framework 3.15, django-cors-headers 4.7
+- **Backend:** Python 3.14, Django 5.2, Django REST Framework 3.17, django-cors-headers 4.9
 - **Frontend:** Vue.js 3.5, Vue Router 4, axios, Vite 6
 - **Database:** PostgreSQL 16 (Docker)
 
