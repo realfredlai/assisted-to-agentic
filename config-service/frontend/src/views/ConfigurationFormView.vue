@@ -45,6 +45,7 @@
 
 <script>
 import api from "../services/api.js";
+import { extractApiErrors } from "../services/apiErrors.js";
 
 const SETTINGS_FIELDS = ["dev_settings", "uat_settings", "prod_settings"];
 
@@ -141,15 +142,9 @@ export default {
         }
         this.$router.push({ name: "application-detail", params: { id: appId } });
       } catch (err) {
-        const data = err.response?.data;
-        if (data && typeof data === "object" && !Array.isArray(data)) {
-          this.fieldErrors = data;
-          if (data.non_field_errors) {
-            this.generalError = data.non_field_errors.join(" ");
-          }
-        } else {
-          this.generalError = err.message;
-        }
+        const { fieldErrors, generalError } = extractApiErrors(err);
+        this.fieldErrors = fieldErrors;
+        this.generalError = generalError;
       }
     },
   },
