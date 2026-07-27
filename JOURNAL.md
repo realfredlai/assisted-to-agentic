@@ -40,3 +40,30 @@
     - Model (LLM model and version): Claude Fable 5
     - Input (file added to the prompt): prompts/5-web-api-versions-upgrade-specs.md, prompts/6-web-api-versions-upgrade-prompt.md
     - Output (file that contains the response): prompts/7-web-api-versions-upgrade-plan.md (plan with citations + reconciliation); execution merged to main as commits bf9935b..4ff19f4 (Django 5.2.16, DRF 3.17.1, psycopg2-binary 2.9.12, django-cors-headers 4.9.0; 7/7 tests green at every step)
+
+6. Entry 6:
+    - Prompt (what we're asking of our assistant): Use @context/ABOUT.md as semantic memory for this project; fill in all the details from the implementation plan at @prompts/4-web-api-implementation.md.
+    - Tool (your AI assistant): Claude Code
+    - Mode (if applicable): Subagent-driven execution requested; resolved to verification + documentation (the plan was already fully implemented and merged as of Entry 5)
+    - Context (clean, from previous, etc.): Clean
+    - Model (LLM model and version): Claude Fable 5
+    - Input (file added to the prompt): context/ABOUT.md, prompts/4-web-api-implementation.md
+    - Output (file that contains the response): context/ABOUT.md (all sections filled: justification, personas, domain context, scope); prompts/4-web-api-implementation.md (all task checkboxes marked complete); verified 7/7 backend tests green on main before checking off
+
+7. Entry 7:
+    - Prompt (what we're asking of our assistant): I have domain.md and architecture.md (fill in the two new empty context docs).
+    - Tool (your AI assistant): Claude Code
+    - Mode (if applicable): Documentation (content sourced from the actual source files, not just the plan)
+    - Context (clean, from previous, etc.): From previous
+    - Model (LLM model and version): Claude Fable 5
+    - Input (file added to the prompt): context/DOMAIN.md and context/ARCHITECTURE.md (empty stubs), config-service backend/frontend source files
+    - Output (file that contains the response): context/DOMAIN.md (entities, actors, use cases, MVP boundaries); context/ARCHITECTURE.md (tiers, stack, patterns, API surface, data flow, testing, dev workflow, key decisions); context/ABOUT.md updated to link the companion docs
+
+8. Entry 8:
+    - Prompt (what we're asking of our assistant): /superpowers:brainstorming config-storage expansion
+    - Tool (your AI assistant): Claude Code
+    - Mode (if applicable): Brainstorm → plan → subagent-driven implementation
+    - Context (clean, from previous, etc.): From previous
+    - Model (LLM model and version): Claude Fable 5
+    - Input (file added to the prompt): prompts/8-web-api-config-storage-specs.md, plan file (`/Users/admin/.claude/plans/swift-waddling-lollipop.md`)
+    - Output (file that contains the response): backend api files (models.py, serializers.py, views.py, urls.py, admin.py, migrations/0002_application_configuration.py, tests.py — 27 new tests, 34 total); frontend src files (services/api.js, router/index.js, App.vue, new views/ApplicationListView.vue, views/ApplicationDetailView.vue, views/ApplicationFormView.vue, views/ConfigurationFormView.vue, components/ApplicationList.vue, components/ConfigurationList.vue); context docs (DOMAIN.md, ARCHITECTURE.md, ABOUT.md) and config-service/README.md updated to match; implemented on branch `feature/config-storage`, commits `f36d1c9..9816aa2`

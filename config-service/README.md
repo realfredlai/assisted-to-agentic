@@ -27,11 +27,11 @@ config-service/
 │   │   ├── settings.py         # DB, CORS, installed apps config
 │   │   └── urls.py             # Root URL routing
 │   └── api/                    # DRF application
-│       ├── models.py           # User model
-│       ├── serializers.py      # UserSerializer
-│       ├── views.py            # UserViewSet (CRUD)
-│       ├── urls.py             # API URL routing (/api/users/)
-│       ├── tests.py            # 7 tests (model + API)
+│       ├── models.py           # User, Application, Configuration models
+│       ├── serializers.py      # UserSerializer, ApplicationSerializer, ConfigurationSerializer
+│       ├── views.py            # UserViewSet, ApplicationViewSet, ConfigurationViewSet (CRUD)
+│       ├── urls.py             # API routing (/api/users/, /api/applications/, nested configurations)
+│       ├── tests.py            # 34 tests (model + API)
 │       └── migrations/         # Database migrations
 └── frontend/
     ├── package.json            # Node dependencies
@@ -39,10 +39,16 @@ config-service/
     ├── index.html              # SPA entry point
     └── src/
         ├── main.js             # Vue app bootstrap
-        ├── App.vue             # Root component
-        ├── router/index.js     # Vue Router config
-        ├── views/HomeView.vue  # Home page — fetches and displays users
-        ├── components/UserList.vue  # User list component
+        ├── App.vue             # Root component; nav (Users | Applications)
+        ├── router/index.js     # Vue Router config (users + applications + configurations routes)
+        ├── views/HomeView.vue             # Home page — fetches and displays users
+        ├── views/ApplicationListView.vue  # Application list page
+        ├── views/ApplicationDetailView.vue # Application detail + its configurations
+        ├── views/ApplicationFormView.vue   # Application create/edit form
+        ├── views/ConfigurationFormView.vue # Configuration create/edit form
+        ├── components/UserList.vue         # User list component
+        ├── components/ApplicationList.vue  # Application list component
+        ├── components/ConfigurationList.vue # Configuration list component
         └── services/api.js     # axios API client
 ```
 
@@ -130,6 +136,22 @@ cd config-service/frontend && npm run dev
 
 Then open `http://localhost:5173` in the browser.
 
+## SPA Pages
+
+The nav bar (Users | Applications) links the two areas of the app:
+
+| Route | Page | Description |
+|-------|------|-------------|
+| `/` | Home | Lists users (display-only; no create/edit/delete UI) |
+| `/applications` | Application list | Lists all applications with type and linked-user count |
+| `/applications/new` | Application form | Create an application (name, type, linked users via checkboxes) |
+| `/applications/:id` | Application detail | Shows the application plus its configurations |
+| `/applications/:id/edit` | Application form | Edit an application |
+| `/applications/:id/configurations/new` | Configuration form | Create a configuration for the application (three JSON textareas: dev/uat/prod) |
+| `/applications/:id/configurations/:configId/edit` | Configuration form | Edit a configuration |
+
+Users remain display-only in the SPA — creating, editing, and deleting users is only possible via the API or Django admin. Application and configuration forms validate JSON textareas client-side before submit and render field-level errors returned by DRF.
+
 ## API Endpoints
 
 | Method | URL | Description |
@@ -139,6 +161,18 @@ Then open `http://localhost:5173` in the browser.
 | `GET` | `/api/users/{id}/` | Retrieve a user |
 | `PUT` | `/api/users/{id}/` | Update a user |
 | `DELETE` | `/api/users/{id}/` | Delete a user |
+| `GET` | `/api/applications/` | List all applications |
+| `POST` | `/api/applications/` | Create a new application |
+| `GET` | `/api/applications/{id}/` | Retrieve an application |
+| `PUT` | `/api/applications/{id}/` | Update an application |
+| `DELETE` | `/api/applications/{id}/` | Delete an application (cascades its configurations) |
+| `GET` | `/api/applications/{app_id}/configurations/` | List configurations for an application |
+| `POST` | `/api/applications/{app_id}/configurations/` | Create a configuration for an application |
+| `GET` | `/api/applications/{app_id}/configurations/{id}/` | Retrieve a configuration |
+| `PUT` | `/api/applications/{app_id}/configurations/{id}/` | Update a configuration |
+| `DELETE` | `/api/applications/{app_id}/configurations/{id}/` | Delete a configuration |
+
+Nested `configurations` routes are hand-rolled (no `drf-nested-routers` dependency): `application` on a configuration is always derived from the URL's `{app_id}`, never accepted in the request body. Unknown `{app_id}` or a configuration id that belongs to a different application both return `404`.
 
 ### Example: Create a User
 
@@ -154,6 +188,26 @@ curl -X POST http://localhost:8000/api/users/ \
 curl http://localhost:8000/api/users/
 ```
 
+### Example: Create an Application (with linked users)
+
+```bash
+curl -X POST http://localhost:8000/api/applications/ \
+  -H "Content-Type: application/json" \
+  -d '{"name":"Payments","app_type":"web","users":[1,2]}'
+```
+
+`app_type` must be one of `mobile`, `desktop`, `web`, `cloud`. `name` must be unique across all applications.
+
+### Example: Create a Configuration for an Application
+
+```bash
+curl -X POST http://localhost:8000/api/applications/1/configurations/ \
+  -H "Content-Type: application/json" \
+  -d '{"name":"default","dev_settings":{"debug":true},"uat_settings":{},"prod_settings":{}}'
+```
+
+`name` must be unique within the application (but may repeat across applications). Each of `dev_settings`, `uat_settings`, `prod_settings` defaults to `{}` and must be a JSON object — arrays or scalars are rejected with `400`.
+
 ## Running Tests
 
 ```bash
@@ -162,7 +216,7 @@ source venv/bin/activate
 python manage.py test
 ```
 
-Expected: 7 tests pass (2 model tests + 5 API tests).
+Expected: 34 tests pass (7 pre-existing User model/API tests + 27 new Application/Configuration model/API tests).
 
 ## Stopping Services
 
