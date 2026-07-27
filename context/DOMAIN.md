@@ -70,7 +70,7 @@ A named set of environment settings belonging to exactly one application.
 
 ## Actors
 
-- **Visitor** — anonymous; opens the SPA and views the user list. Read-only, no login.
+- **Visitor** — anonymous; opens the SPA to view the user list and to create, view, edit, and delete applications and their configurations. Still no login.
 - **API client** — any HTTP client (curl, scripts, the SPA); may perform full CRUD on users, applications, and configurations. The API is public by MVP decision — there is no authentication or authorization.
 - **Administrator** — manages user, application, and configuration records through Django admin (`/admin/`), which requires a Django superuser account (this is Django's own auth, separate from the `User` entity).
 

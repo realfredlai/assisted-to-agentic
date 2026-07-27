@@ -65,4 +65,4 @@ Recorded in `prompts/4-web-api-plan-answers.md` and the implementation plan — 
 
 - Backend pins are upgraded as their own workflow cycle (specs → prompt → plan → execution), e.g. `prompts/5-web-api-versions-upgrade-specs.md` → `prompts/7-web-api-versions-upgrade-plan.md`, merged as `bf9935b..4ff19f4` (Django 5.1.9 → 5.2.16).
 - Prefer Django **LTS** releases; prefer dependency versions with official support for the current Python runtime.
-- After any upgrade: run the test suite (7/7 green) and record the run in `JOURNAL.md`.
+- After any upgrade: run the test suite (all green) and record the run in `JOURNAL.md`.
