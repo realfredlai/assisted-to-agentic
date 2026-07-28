@@ -45,9 +45,9 @@ The application domain started as a minimal user directory — a single custom `
 - PostgreSQL via Docker Compose; schema managed entirely by Django ORM migrations
 - Django admin registration for the User, Application, and Configuration models
 - Dependency versions upgrade to the Django 5.2 LTS line (see `prompts/7-web-api-versions-upgrade-plan.md`) — merged to `main`
-- Application registry: `name`/`app_type` (4 types: mobile, desktop, web, cloud)/`users` M2M, full CRUD REST API under `/api/applications/` (branch `feature/config-storage`)
-- Configuration resource nested under applications (three environments — `dev_settings`/`uat_settings`/`prod_settings`, each a JSON object): full CRUD REST API under `/api/applications/{app_id}/configurations/`, hand-rolled nesting (branch `feature/config-storage`)
-- Full CRUD SPA for applications and configurations (list/detail/create/edit, JSON-textarea validation); users remain display-only in the SPA (branch `feature/config-storage`)
+- Application registry: `name`/`app_type` (4 types: mobile, desktop, web, cloud)/`users` M2M, full CRUD REST API under `/api/applications/` — merged to `main`
+- Configuration resource nested under applications (three environments — `dev_settings`/`uat_settings`/`prod_settings`, each a JSON object): full CRUD REST API under `/api/applications/{app_id}/configurations/`, hand-rolled nesting — merged to `main`
+- Full CRUD SPA for applications and configurations (list/detail/create/edit, JSON-textarea validation); users remain display-only in the SPA — merged to `main`
 - Test suite (34 tests: 7 original User tests + 27 new Application/Configuration tests) using Django's default test framework
 
 **Out of scope (explicit MVP decisions):**
@@ -58,4 +58,4 @@ The application domain started as a minimal user directory — a single custom `
 - `drf-nested-routers` or any other new dependency for the nested configuration routes
 - Pagination/search, per-environment settings schema, user CRUD via the SPA
 
-**Status:** initial implementation plan (`prompts/4-web-api-implementation.md`) fully executed (commit `8cd130e`); versions-upgrade plan fully executed and merged (`bf9935b..4ff19f4`); config-storage expansion (spec `prompts/8-web-api-config-storage-specs.md`) implemented on branch `feature/config-storage` (commits `f36d1c9..9816aa2`), not yet merged to `main`; 34/34 backend tests green as of 2026-07-28.
+**Status:** initial implementation plan (`prompts/4-web-api-implementation.md`) fully executed (commit `8cd130e`); versions-upgrade plan fully executed and merged (`bf9935b..4ff19f4`); config-storage expansion (spec `prompts/8-web-api-config-storage-specs.md`) fully executed and merged (`48c4eee..47662c6`); 34/34 backend tests green as of 2026-07-28.
