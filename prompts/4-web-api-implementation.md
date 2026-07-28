@@ -169,7 +169,7 @@ config-service/
 **Produces:**
 - A running PostgreSQL instance on `localhost:5432` with database `config_service_db`, user `postgres`, password `postgres`
 
-- [ ] **Step 1: Create `docker-compose.yml`**
+- [x] **Step 1: Create `docker-compose.yml`**
 
 Create file `config-service/docker-compose.yml`:
 
@@ -193,19 +193,19 @@ volumes:
   pgdata:
 ```
 
-- [ ] **Step 2: Start PostgreSQL**
+- [x] **Step 2: Start PostgreSQL**
 
 Run: `cd config-service && docker compose up -d`
 
 Expected: PostgreSQL container starts and is accessible on `localhost:5432`.
 
-- [ ] **Step 3: Verify PostgreSQL is running**
+- [x] **Step 3: Verify PostgreSQL is running**
 
 Run: `docker compose ps`
 
 Expected: `db` service shows status `Up`.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 cd config-service && git add docker-compose.yml
@@ -228,14 +228,14 @@ git commit -m "feat: add Docker Compose for PostgreSQL"
 - An empty `api` app registered in `INSTALLED_APPS`
 - PostgreSQL connection configured and initial migrations applied
 
-- [ ] **Step 1: Create virtual environment**
+- [x] **Step 1: Create virtual environment**
 
 Run:
 ```bash
 cd config-service && python3 -m venv backend/venv
 ```
 
-- [ ] **Step 2: Create `requirements.txt`**
+- [x] **Step 2: Create `requirements.txt`**
 
 Create file `config-service/backend/requirements.txt`:
 
@@ -248,7 +248,7 @@ django-cors-headers==4.7.0
 
 *(Verify latest patch versions at implementation time and update accordingly)*
 
-- [ ] **Step 3: Install dependencies**
+- [x] **Step 3: Install dependencies**
 
 Run:
 ```bash
@@ -257,7 +257,7 @@ cd config-service && source backend/venv/bin/activate && pip install -r backend/
 
 Expected: All packages install without errors.
 
-- [ ] **Step 4: Scaffold the Django project**
+- [x] **Step 4: Scaffold the Django project**
 
 Run:
 ```bash
@@ -266,7 +266,7 @@ cd config-service/backend && source venv/bin/activate && django-admin startproje
 
 Expected: `manage.py` and `config/` directory are created in `config-service/backend/`.
 
-- [ ] **Step 5: Create the API app**
+- [x] **Step 5: Create the API app**
 
 Run:
 ```bash
@@ -275,7 +275,7 @@ cd config-service/backend && source venv/bin/activate && python manage.py starta
 
 Expected: `api/` directory is created with standard Django app files.
 
-- [ ] **Step 6: Configure `settings.py`**
+- [x] **Step 6: Configure `settings.py`**
 
 Edit `config-service/backend/config/settings.py`:
 
@@ -332,7 +332,7 @@ DATABASES = {
 }
 ```
 
-- [ ] **Step 7: Apply initial migrations**
+- [x] **Step 7: Apply initial migrations**
 
 Run:
 ```bash
@@ -341,7 +341,7 @@ cd config-service/backend && source venv/bin/activate && python manage.py migrat
 
 Expected: All Django built-in migrations apply successfully.
 
-- [ ] **Step 8: Verify the server starts**
+- [x] **Step 8: Verify the server starts**
 
 Run:
 ```bash
@@ -350,7 +350,7 @@ cd config-service/backend && source venv/bin/activate && python manage.py runser
 
 Expected: Server starts at `http://127.0.0.1:8000/` without errors.
 
-- [ ] **Step 9: Commit**
+- [x] **Step 9: Commit**
 
 ```bash
 cd config-service && git add backend/
@@ -378,7 +378,7 @@ git commit -m "feat: scaffold Django backend with DRF, django-cors-headers, and 
 - Full CRUD via `ModelViewSet` at `/api/users/` and `/api/users/{id}/`
 - Tests verifying list, create, retrieve, update, delete
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 Edit `config-service/backend/api/tests.py`:
 
@@ -459,7 +459,7 @@ class UserAPITest(APITestCase):
         self.assertEqual(User.objects.count(), 0)
 ```
 
-- [ ] **Step 2: Run tests to verify they fail**
+- [x] **Step 2: Run tests to verify they fail**
 
 Run:
 ```bash
@@ -468,7 +468,7 @@ cd config-service/backend && source venv/bin/activate && python manage.py test
 
 Expected: FAIL — `ImportError: cannot import name 'User' from 'api.models'`
 
-- [ ] **Step 3: Define the User model**
+- [x] **Step 3: Define the User model**
 
 Edit `config-service/backend/api/models.py`:
 
@@ -490,7 +490,7 @@ class User(models.Model):
         return f"{self.first_name} {self.last_name}"
 ```
 
-- [ ] **Step 4: Generate and apply migrations**
+- [x] **Step 4: Generate and apply migrations**
 
 Run:
 ```bash
@@ -500,7 +500,7 @@ python manage.py migrate
 
 Expected: Migration `0001_initial.py` is created and applied.
 
-- [ ] **Step 5: Create the serializer**
+- [x] **Step 5: Create the serializer**
 
 Edit `config-service/backend/api/serializers.py`:
 
@@ -517,7 +517,7 @@ class UserSerializer(serializers.ModelSerializer):
         read_only_fields = ["id", "created_at", "updated_at"]
 ```
 
-- [ ] **Step 6: Create the viewset**
+- [x] **Step 6: Create the viewset**
 
 Edit `config-service/backend/api/views.py`:
 
@@ -533,7 +533,7 @@ class UserViewSet(viewsets.ModelViewSet):
     serializer_class = UserSerializer
 ```
 
-- [ ] **Step 7: Create API URL routing**
+- [x] **Step 7: Create API URL routing**
 
 Create `config-service/backend/api/urls.py`:
 
@@ -551,7 +551,7 @@ urlpatterns = [
 ]
 ```
 
-- [ ] **Step 8: Mount API URLs in root config**
+- [x] **Step 8: Mount API URLs in root config**
 
 Edit `config-service/backend/config/urls.py`:
 
@@ -565,7 +565,7 @@ urlpatterns = [
 ]
 ```
 
-- [ ] **Step 9: Register model in admin**
+- [x] **Step 9: Register model in admin**
 
 Edit `config-service/backend/api/admin.py`:
 
@@ -577,7 +577,7 @@ from api.models import User
 admin.site.register(User)
 ```
 
-- [ ] **Step 10: Run tests to verify they pass**
+- [x] **Step 10: Run tests to verify they pass**
 
 Run:
 ```bash
@@ -586,7 +586,7 @@ cd config-service/backend && source venv/bin/activate && python manage.py test
 
 Expected: All 7 tests pass (2 model tests + 5 API tests).
 
-- [ ] **Step 11: Verify endpoints manually**
+- [x] **Step 11: Verify endpoints manually**
 
 Run:
 ```bash
@@ -614,7 +614,7 @@ curl http://localhost:8000/api/users/
 
 Expected: JSON array with one user.
 
-- [ ] **Step 12: Commit**
+- [x] **Step 12: Commit**
 
 ```bash
 cd config-service && git add backend/
@@ -632,7 +632,7 @@ git commit -m "feat: add User model, serializer, viewset, and API tests"
 - A Vue.js 3 project with Vue Router and Vite at `config-service/frontend/`
 - Dev server running at `http://localhost:5173`
 
-- [ ] **Step 1: Scaffold the Vue.js project**
+- [x] **Step 1: Scaffold the Vue.js project**
 
 Run:
 ```bash
@@ -649,7 +649,7 @@ When prompted, select:
 - Add ESLint? — **No**
 - Add Prettier? — **No**
 
-- [ ] **Step 2: Install dependencies**
+- [x] **Step 2: Install dependencies**
 
 Run:
 ```bash
@@ -658,7 +658,7 @@ cd config-service/frontend && npm install
 
 Expected: Dependencies install without errors.
 
-- [ ] **Step 3: Install axios**
+- [x] **Step 3: Install axios**
 
 Run:
 ```bash
@@ -667,7 +667,7 @@ cd config-service/frontend && npm install axios
 
 Expected: axios is added to `package.json` dependencies.
 
-- [ ] **Step 4: Verify the dev server starts**
+- [x] **Step 4: Verify the dev server starts**
 
 Run:
 ```bash
@@ -676,7 +676,7 @@ cd config-service/frontend && npm run dev
 
 Expected: Vite dev server starts at `http://localhost:5173/`.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 cd config-service && git add frontend/
@@ -702,7 +702,7 @@ git commit -m "feat: scaffold Vue.js frontend with Vue Router and axios"
 - `HomeView.vue` that fetches users on mount and passes them to `UserList`
 - Working SPA with route at `/` displaying the user list
 
-- [ ] **Step 1: Create the API service**
+- [x] **Step 1: Create the API service**
 
 Create `config-service/frontend/src/services/api.js`:
 
@@ -723,7 +723,7 @@ export default {
 }
 ```
 
-- [ ] **Step 2: Create the UserList component**
+- [x] **Step 2: Create the UserList component**
 
 Create `config-service/frontend/src/components/UserList.vue`:
 
@@ -753,7 +753,7 @@ export default {
 </script>
 ```
 
-- [ ] **Step 3: Update HomeView to fetch and display users**
+- [x] **Step 3: Update HomeView to fetch and display users**
 
 Replace the content of `config-service/frontend/src/views/HomeView.vue`:
 
@@ -797,7 +797,7 @@ export default {
 </script>
 ```
 
-- [ ] **Step 4: Update the router**
+- [x] **Step 4: Update the router**
 
 Replace the content of `config-service/frontend/src/router/index.js`:
 
@@ -819,7 +819,7 @@ const router = createRouter({
 export default router
 ```
 
-- [ ] **Step 5: Simplify App.vue**
+- [x] **Step 5: Simplify App.vue**
 
 Replace the content of `config-service/frontend/src/App.vue`:
 
@@ -837,7 +837,7 @@ export default {
 </script>
 ```
 
-- [ ] **Step 6: Verify the full data flow**
+- [x] **Step 6: Verify the full data flow**
 
 Start all services in separate terminals:
 
@@ -871,7 +871,7 @@ Refresh the browser page.
 
 Expected: The page shows "Alice Smith — alice@example.com" in the list.
 
-- [ ] **Step 7: Run backend tests**
+- [x] **Step 7: Run backend tests**
 
 Run:
 ```bash
@@ -880,7 +880,7 @@ cd config-service/backend && source venv/bin/activate && python manage.py test
 
 Expected: All 7 tests pass.
 
-- [ ] **Step 8: Commit**
+- [x] **Step 8: Commit**
 
 ```bash
 cd config-service && git add frontend/
