@@ -67,3 +67,12 @@
     - Model (LLM model and version): Claude Fable 5
     - Input (file added to the prompt): prompts/8-web-api-config-storage-specs.md, plan file (`/Users/admin/.claude/plans/swift-waddling-lollipop.md`)
     - Output (file that contains the response): backend api files (models.py, serializers.py, views.py, urls.py, admin.py, migrations/0002_application_configuration.py, tests.py — 27 new tests, 34 total); frontend src files (services/api.js, router/index.js, App.vue, new views/ApplicationListView.vue, views/ApplicationDetailView.vue, views/ApplicationFormView.vue, views/ConfigurationFormView.vue, components/ApplicationList.vue, components/ConfigurationList.vue); context docs (DOMAIN.md, ARCHITECTURE.md, ABOUT.md) and config-service/README.md updated to match; implemented on branch `feature/config-storage`, commits `f36d1c9..9816aa2`
+
+9. Entry 9:
+    - Prompt (what we're asking of our assistant): Make sure there is a Makefile to bring up the full stack, including installing dependencies, tests, and anything else done regularly.
+    - Tool (your AI assistant): Claude Code
+    - Mode (if applicable): Direct implementation with end-to-end verification
+    - Context (clean, from previous, etc.): From previous
+    - Model (LLM model and version): Claude Fable 5
+    - Input (file added to the prompt): config-service/README.md, docker-compose.yml, frontend/package.json (existing regular commands)
+    - Output (file that contains the response): config-service/Makefile (up, install, test, migrate/makemigrations, backend/frontend, db-up/db-down/db-destroy/db-status, superuser, shell, build, clean); README.md gains a Quick Start (Make) section; context/ARCHITECTURE.md development workflow section now documents the Make targets. Verified: make install, make test (34/34 green), make migrate, make build, and make up (API :8000 and SPA :5173 both 200, then shut down)

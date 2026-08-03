@@ -115,13 +115,21 @@ No pagination, filtering, throttling, or auth is configured (`REST_FRAMEWORK` se
 
 ## Development workflow
 
+Everyday tasks are driven by `config-service/Makefile` (run from `config-service/`; `make` alone lists all targets):
+
 ```
-cd config-service && docker compose up -d                                        # 1. database
-cd config-service/backend && source venv/bin/activate && python manage.py runserver   # 2. API :8000
-cd config-service/frontend && npm run dev                                        # 3. SPA :5173
+make up          # full stack: installs deps, starts db, migrates, runs API :8000 + SPA :5173 (Ctrl+C stops)
+make test        # backend test suite (starts db if needed)
+make install     # venv + pip install, npm install
+make migrate     # apply migrations        make makemigrations  # generate after model changes
+make backend     # API only :8000          make frontend        # SPA only :5173
+make db-up       # start Postgres          make db-down         # stop (data kept)
+make superuser   # Django admin account    make shell           # Django shell
+make build       # production frontend build (frontend/dist/)
+make db-destroy  # stop Postgres AND delete all data
 ```
 
-Stop with `docker compose down` (add `-v` to wipe the database volume). See `config-service/README.md` for full setup-from-scratch instructions.
+The equivalent manual commands (docker compose / manage.py / npm directly) are documented in `config-service/README.md`.
 
 ## Key architectural decisions
 

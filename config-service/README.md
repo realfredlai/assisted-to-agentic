@@ -52,6 +52,18 @@ config-service/
         └── services/api.js     # axios API client
 ```
 
+## Quick Start (Make)
+
+All regular tasks are wrapped in the [Makefile](Makefile). From `config-service/`:
+
+```bash
+make up
+```
+
+installs all dependencies (venv + pip, npm), starts PostgreSQL, applies migrations, and runs the API on :8000 and the SPA on :5173 (Ctrl+C stops both servers; `make db-down` stops the database). Other frequent targets: `make test`, `make migrate`, `make superuser`, `make build` — run `make` alone to list them all.
+
+The sections below document the equivalent manual commands.
+
 ## Getting Started
 
 ### 1. Start PostgreSQL
