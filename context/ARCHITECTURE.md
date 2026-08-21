@@ -104,7 +104,7 @@ No pagination, filtering, throttling, or auth is configured (`REST_FRAMEWORK` se
 ## Testing
 
 - Django's default framework only: `django.test.TestCase` + DRF `APITestCase`/`APIClient` in `backend/api/tests.py`.
-- 34 tests across six classes:
+- 44 tests: 34 in `api/tests.py` across six classes plus 10 in `knowledge_graph/tests.py` (CLI import/lookup/related/validate/list-areas against temp SQLite — no Postgres needed):
   - `UserModelTest` (2): creation, `__str__`.
   - `UserAPITest` (5): list, create, retrieve, update, delete.
   - `ApplicationModelTest` (4): creation, `__str__`, cascade-delete of configurations, deleting a linked user leaves the application in place.
@@ -112,6 +112,25 @@ No pagination, filtering, throttling, or auth is configured (`REST_FRAMEWORK` se
   - `ApplicationAPITest` (9): list ordering, create (valid / duplicate name / invalid `app_type` / with users / unknown user id), retrieve, patch `users`, delete cascades its configurations.
   - `ConfigurationAPITest` (10): nested list scoped to its application, create (settings default / non-object settings rejected / duplicate name / same name under another application), retrieve, update via PUT and PATCH, delete, unknown application id 404s list and create, configuration id under the wrong application 404s.
 - Run: `cd config-service/backend && source venv/bin/activate && python manage.py test` — requires the Postgres container up (tests create/destroy a `test_config_service_db`).
+
+## Knowledge graph
+
+The domain language is machine-queryable, modelled on the Module 5 `knowledge-graph` reference but adapted to this stack (Django management command instead of Typer; same YAML→SQLite→CLI shape):
+
+```
+knowledge/{nodes,edges}/*.yaml    ← hand-authored; SOURCE OF TRUTH: context/DOMAIN.md
+        │  make knowledge-import
+        ▼
+config-service/knowledge.db       ← SQLite, gitignored, rebuilt at will
+        │
+        └──► manage.py knowledge  lookup / related / list-areas / validate
+             (JSON by default — subprocess-wrappable; --format table for humans)
+```
+
+- Implementation: `backend/knowledge_graph/` (`storage.py`, `importer.py`, `management/commands/knowledge.py`). Deliberately **not** Django ORM/Postgres: domain language is not application data, and the CLI works with Docker down.
+- 5 nodes in two areas (`user_directory`, `config_storage`) and 6 directed edges; `lookup` resolves id, name, or alias case-insensitively; `related` returns outgoing edges.
+- Each node's `warnings` carry the sharp edges (e.g. `User` is not an auth account; `application` comes from the URL, never the body; there is no Environment entity).
+- New dependency: PyYAML (approved). Make targets: `knowledge-import`, `knowledge-validate`, `knowledge-lookup TERM=…`.
 
 ## Development workflow
 
@@ -127,6 +146,7 @@ make db-up       # start Postgres          make db-down         # stop (data kep
 make superuser   # Django admin account    make shell           # Django shell
 make build       # production frontend build (frontend/dist/)
 make db-destroy  # stop Postgres AND delete all data
+make knowledge-import / knowledge-validate / knowledge-lookup TERM=…   # domain knowledge graph
 ```
 
 The equivalent manual commands (docker compose / manage.py / npm directly) are documented in `config-service/README.md`.

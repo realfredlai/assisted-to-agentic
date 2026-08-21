@@ -27,3 +27,5 @@ Thumbs.db
 # Environment
 .env
 *.log
+# Knowledge graph (generated from knowledge/*.yaml — rebuild with make knowledge-import)
+knowledge.db

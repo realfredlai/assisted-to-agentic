@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'corsheaders',
     # Local
     'api',
+    'knowledge_graph',
 ]
 
 MIDDLEWARE = [

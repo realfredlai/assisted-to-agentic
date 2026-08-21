@@ -1,0 +1,27 @@
+# Directed edges between domain terms. SOURCE OF TRUTH: context/DOMAIN.md.
+# `related <term>` returns edges FROM that term.
+
+edges:
+  - from: application
+    to: configuration
+    relationship: owns
+
+  - from: application
+    to: app_type
+    relationship: classified_by
+
+  - from: application
+    to: user
+    relationship: associated_with
+
+  - from: user
+    to: application
+    relationship: associated_with
+
+  - from: configuration
+    to: application
+    relationship: belongs_to
+
+  - from: configuration
+    to: environment_settings
+    relationship: contains

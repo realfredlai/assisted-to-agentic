@@ -10,7 +10,8 @@ MANAGE := cd backend && venv/bin/python manage.py
 
 .PHONY: help install install-backend install-frontend up backend frontend \
         db-up db-down db-destroy db-status migrate makemigrations \
-        test superuser shell build clean
+        test superuser shell build clean \
+        knowledge-import knowledge-validate knowledge-lookup
 
 help: ## List available targets
 	@awk 'BEGIN {FS = ":.*## "} /^[a-zA-Z_-]+:.*## / {printf "  \033[36m%-16s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
@@ -71,6 +72,18 @@ shell: db-up ## Open a Django shell
 build: ## Build the frontend for production (frontend/dist/)
 	cd frontend && npm run build
 
-clean: ## Remove build artifacts and Python caches (keeps venv, node_modules, db data)
+## ---------- Knowledge graph ----------
+
+knowledge-import: ## Import knowledge/ YAML into knowledge.db
+	$(MANAGE) knowledge import
+
+knowledge-validate: ## Check the knowledge graph for missing references
+	$(MANAGE) knowledge validate
+
+knowledge-lookup: ## Look up TERM in the knowledge graph (make knowledge-lookup TERM=app)
+	$(MANAGE) knowledge lookup "$(TERM)"
+
+clean: ## Remove build artifacts, Python caches, and knowledge.db (keeps venv, node_modules, db data)
 	rm -rf frontend/dist
+	rm -f knowledge.db
 	find backend -type d -name __pycache__ -prune -exec rm -rf {} +

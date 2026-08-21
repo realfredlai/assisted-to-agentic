@@ -2,3 +2,4 @@ Django==5.2.16
 djangorestframework==3.17.1
 psycopg2-binary==2.9.12
 django-cors-headers==4.9.0
+PyYAML==6.0.3

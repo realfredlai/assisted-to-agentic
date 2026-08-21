@@ -4,7 +4,7 @@ A full stack application consisting of a Django REST Framework (DRF) backend API
 
 ## Tech Stack
 
-- **Backend:** Python 3.14, Django 5.2, Django REST Framework 3.17, django-cors-headers 4.9
+- **Backend:** Python 3.14, Django 5.2, Django REST Framework 3.17, django-cors-headers 4.9, PyYAML 6.0
 - **Frontend:** Vue.js 3.5, Vue Router 4, axios, Vite 6
 - **Database:** PostgreSQL 16 (Docker)
 
@@ -26,13 +26,15 @@ config-service/
 │   ├── config/                 # Django project settings
 │   │   ├── settings.py         # DB, CORS, installed apps config
 │   │   └── urls.py             # Root URL routing
-│   └── api/                    # DRF application
+│   ├── api/                    # DRF application
 │       ├── models.py           # User, Application, Configuration models
 │       ├── serializers.py      # UserSerializer, ApplicationSerializer, ConfigurationSerializer
 │       ├── views.py            # UserViewSet, ApplicationViewSet, ConfigurationViewSet (CRUD)
 │       ├── urls.py             # API routing (/api/users/, /api/applications/, nested configurations)
 │       ├── tests.py            # 34 tests (model + API)
 │       └── migrations/         # Database migrations
+│   └── knowledge_graph/        # Knowledge graph app (storage, importer, manage.py knowledge CLI, 10 tests)
+├── knowledge/                  # Domain knowledge YAML (nodes/ + edges/; source of truth: context/DOMAIN.md)
 └── frontend/
     ├── package.json            # Node dependencies
     ├── vite.config.js          # Vite build config
@@ -220,6 +222,25 @@ curl -X POST http://localhost:8000/api/applications/1/configurations/ \
 
 `name` must be unique within the application (but may repeat across applications). Each of `dev_settings`, `uat_settings`, `prod_settings` defaults to `{}` and must be a JSON object — arrays or scalars are rejected with `400`.
 
+## Knowledge Graph
+
+The domain language of this service (User, Application, Configuration, …) is queryable as a small knowledge graph: hand-authored YAML in `knowledge/{nodes,edges}/`, imported into a local SQLite file (`knowledge.db`, gitignored), queried via `manage.py knowledge`. Works without Docker — the graph never touches Postgres.
+
+```bash
+make knowledge-import              # rebuild knowledge.db from the YAML (run after editing it)
+make knowledge-validate            # check for edges pointing at missing nodes
+make knowledge-lookup TERM=app     # look up a term by id, name, or alias (JSON)
+```
+
+Direct CLI use (from `backend/`, venv active) adds `related <term>`, `list-areas`, and `--format table` for human-readable output:
+
+```bash
+python manage.py knowledge lookup "config entry" --format table
+python manage.py knowledge related application
+```
+
+The YAML is a projection of `context/DOMAIN.md` — if they disagree, DOMAIN.md wins and the YAML gets corrected.
+
 ## Running Tests
 
 ```bash
@@ -228,7 +249,7 @@ source venv/bin/activate
 python manage.py test
 ```
 
-Expected: 34 tests pass (7 pre-existing User model/API tests + 27 new Application/Configuration model/API tests).
+Expected: 44 tests pass (34 api tests: User/Application/Configuration models and API; 10 knowledge_graph tests: import, lookup, related, validate, list-areas).
 
 ## Stopping Services
 

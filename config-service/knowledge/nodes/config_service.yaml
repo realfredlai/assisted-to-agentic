@@ -1,0 +1,120 @@
+# Domain language for config-service, as machine-queryable knowledge.
+#
+# SOURCE OF TRUTH: context/DOMAIN.md. This file is a derived projection of it —
+# if the two disagree, DOMAIN.md wins and this file must be corrected.
+# After editing, re-run: make knowledge-import && make knowledge-validate
+
+nodes:
+  - id: user
+    type: domain_term
+    area: user_directory
+    name: User
+    definition: >
+      A directory entry for a person: first name, last name, and a unique
+      email. The original resource of the service, displayed as a read-only
+      list in the SPA.
+    aliases:
+      - person
+      - directory entry
+    warnings:
+      - This is NOT django.contrib.auth's user. It is a business resource -
+        nobody logs in as a User, and it carries no credentials.
+      - Email is unique across all users; creating a second user with an
+        existing email is rejected with a 400.
+      - The SPA offers no create/edit/delete UI for users - user mutations
+        happen only via the API or Django admin.
+    source_files:
+      - config-service/backend/api/models.py
+      - config-service/backend/api/serializers.py
+    documentation:
+      - context/DOMAIN.md
+      - context/ABOUT.md
+
+  - id: application
+    type: domain_term
+    area: config_storage
+    name: Application
+    definition: >
+      An application owned by the organization whose configuration is tracked.
+      Has a unique name, an app_type, and an optional set of associated users
+      (many-to-many).
+    aliases:
+      - app
+    warnings:
+      - Application name is unique across the system.
+      - Deleting an application cascades and deletes all of its configurations.
+      - The users<->application many-to-many supersedes the original spec's
+        users<->configuration wording - corrected during design review.
+    source_files:
+      - config-service/backend/api/models.py
+      - config-service/backend/api/views.py
+    documentation:
+      - context/DOMAIN.md
+
+  - id: app_type
+    type: domain_term
+    area: config_storage
+    name: AppType
+    definition: >
+      The classification of an Application. Exactly four values exist:
+      mobile, desktop, web, cloud.
+    aliases:
+      - application type
+    warnings:
+      - The four choices are enforced by the model; any other value is a 400.
+        There are no roles or statuses beyond this field.
+    source_files:
+      - config-service/backend/api/models.py
+    documentation:
+      - context/DOMAIN.md
+
+  - id: configuration
+    type: domain_term
+    area: config_storage
+    name: Configuration
+    definition: >
+      A named set of environment settings belonging to exactly one Application.
+      Reached only through its application's nested URL
+      (/api/applications/{app_id}/configurations/).
+    aliases:
+      - config
+      - config entry
+    warnings:
+      - Configuration name is unique PER APPLICATION - the same name may be
+        reused across different applications.
+      - The application is always derived from the URL, never accepted in the
+        request body.
+      - A configuration that exists under a different application than the URL
+        names is a 404, not a 403.
+    source_files:
+      - config-service/backend/api/models.py
+      - config-service/backend/api/serializers.py
+      - config-service/backend/api/views.py
+    documentation:
+      - context/DOMAIN.md
+      - context/ARCHITECTURE.md
+
+  - id: environment_settings
+    type: domain_term
+    area: config_storage
+    name: EnvironmentSettings
+    definition: >
+      The three per-environment JSON blobs on a Configuration - dev_settings,
+      uat_settings, prod_settings. Each defaults to {} and must be a JSON
+      object.
+    aliases:
+      - dev settings
+      - uat settings
+      - prod settings
+    warnings:
+      - There is NO Environment entity in this domain - dev/uat/prod are three
+        independent JSON object fields on Configuration, nothing more.
+      - Arrays and scalars are rejected; only JSON objects are accepted. No
+        schema is enforced beyond "must be an object".
+      - The three environments are independent - no inheritance or overlay
+        semantics between dev, uat, and prod.
+    source_files:
+      - config-service/backend/api/models.py
+      - config-service/backend/api/serializers.py
+    documentation:
+      - context/DOMAIN.md
