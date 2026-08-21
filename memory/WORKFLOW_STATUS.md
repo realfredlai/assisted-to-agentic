@@ -55,7 +55,7 @@ Implement and validate.
 
   | Check | Command | Status |
   |-------|---------|--------|
-  | Tests | `make test` | ✅ configured — 34 tests |
+  | Tests | `make test` | ✅ configured — 44 tests |
   | Linting | `make lint` | ⏳ not yet — planned |
   | Type checking | `make typecheck` | ⏳ not yet — planned |
 
@@ -116,13 +116,13 @@ After the purge a work item keeps only: title, number, and goal; the acceptance 
 ## Active work item
 
 - **Work item:** [`changes/001-knowledge-graph-cli.md`](../changes/001-knowledge-graph-cli.md) — knowledge graph CLI (YAML → SQLite → `manage.py knowledge`)
-- **Stage:** 3 REFLECT & ADAPT — **awaiting sign-off** (stages 1–2 signed off 2026-08-19). Four friction points dispositioned; ENV_SCRIPTS gained the Docker-daemon-down procedure.
+- **Stage:** 4 COMMIT & PICK NEXT — **awaiting final sign-off**. Committed (`980ba66` docs framework, `a91a4aa` feature, + purge commit); work item purged to criteria/decisions/outcome.
 
 ## Current position
 
 - **Branch:** `main` (tracks `origin/main`); no feature branches open — merged branches are deleted after fast-forward.
 - **Health:** backend tests 44/44 green (34 api + 10 knowledge_graph), verified 2026-08-19; `make up` end-to-end verified 2026-08-03.
-- **Uncommitted:** `memory/` and `changes/` (new, incl. work item 001), plus edits to `JOURNAL.md`, `AGENTS.md`, and `context/ABOUT.md`.
+- **Uncommitted:** nothing from the workflow. One stray: `config-service/backend/ux-unification-planning/` — an unrelated workspace (own remote), deliberately left untracked; flagged to the user to relocate.
 
 ## Completed work
 
@@ -135,7 +135,8 @@ Predates the `changes/` convention — the record is the journal entries and com
 | 3 | Semantic-memory docs | `context/*.md` | Written; kept current with the code | Entries 6–7 |
 | 4 | Config-storage expansion | `prompts/8` | Merged `f36d1c9..9816aa2` via `feature/config-storage` (Application + Configuration models, nested API, CRUD UI; 34 tests) | Entry 8 |
 | 5 | Developer tooling | `config-service/Makefile` | Committed; every target verified | Entry 9 |
-| 6 | Memory framework: procedural + episodic, four-stage process | `memory/*.md`, `changes/TEMPLATE.md` | This work; uncommitted | Entries 10–13 |
+| 6 | Memory framework: procedural + episodic, four-stage process | `memory/*.md`, `changes/TEMPLATE.md` | Committed `980ba66` | Entries 10–14 |
+| 7 | Knowledge graph CLI (first work item under the four-stage process) | `changes/001`, `knowledge/`, `backend/knowledge_graph/` | Committed `a91a4aa` (+ purge commit); 44/44 tests | Entries 15–17 |
 
 ## Open decisions
 
@@ -150,3 +151,5 @@ Predates the `changes/` convention — the record is the journal entries and com
   Same applies to **CI**, which also does not exist yet: if a pipeline is added, document it in `ENV_SCRIPTS.md` under Environments and say which checks it runs.
 - `JOURNAL.md` entries 1–4 still carry "[enter after the run completes]" in Cost/Reflections (entries 2–4 also omit Tool/Model) — backfill or leave, your call.
 - No seed-data fixture; an empty database shows "No users found." until records are created via the API or admin.
+- **Next work item (proposed):** `002-lint-and-typecheck` — make the BUILD & ASSESS gate real (ruff/mypy/eslint + make targets); needs dependency approval, then a PLAN.
+- **Stray directory:** `config-service/backend/ux-unification-planning/` is an unrelated planning workspace with its own GitHub remote — should move out of this repo.

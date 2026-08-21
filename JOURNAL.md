@@ -139,3 +139,12 @@
     - Model (LLM model and version): Claude Fable 5
     - Input (file added to the prompt): changes/001-knowledge-graph-cli.md BUILD notes
     - Output (file that contains the response): work item REFLECT & ADAPT section — four frictions dispositioned (requirements.txt newline: fixed; builtin-shadowing ImportError from reference: fixed; Docker daemon down at gate: fixed via ENV_SCRIPTS.md addition; YAML/DOMAIN.md drift: accepted with mitigations); no process changes proposed. Stage 3 awaiting sign-off.
+
+17. Entry 17:
+    - Prompt (what we're asking of our assistant): go for it (stage 3 signed off; execute COMMIT & PICK NEXT)
+    - Tool (your AI assistant): Claude Code
+    - Mode (if applicable): Four-stage process — COMMIT & PICK NEXT
+    - Context (clean, from previous, etc.): From previous
+    - Model (LLM model and version): Claude Fable 5
+    - Input (file added to the prompt): changes/001-knowledge-graph-cli.md, README/ARCHITECTURE/ENV_SCRIPTS
+    - Output (file that contains the response): docs updated in-commit (README knowledge section + 44-test count, ARCHITECTURE knowledge-graph section, ENV_SCRIPTS knowledge targets); commits: 980ba66 (docs: memory framework), a91a4aa (feat: knowledge graph CLI), followed by the purge commit (work item reduced to criteria/decisions/outcome per purge discipline). Next proposed: 002-lint-and-typecheck. Stray unrelated dir config-service/backend/ux-unification-planning/ excluded from all commits and flagged.
