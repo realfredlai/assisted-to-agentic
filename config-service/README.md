@@ -7,6 +7,7 @@ A full stack application consisting of a Django REST Framework (DRF) backend API
 - **Backend:** Python 3.14, Django 5.2, Django REST Framework 3.17, django-cors-headers 4.9, PyYAML 6.0
 - **Frontend:** Vue.js 3.5, Vue Router 4, axios, Vite 6
 - **Database:** PostgreSQL 16 (Docker)
+- **MCP server:** official `mcp` SDK 2.0 + pytest (separate venv under `backend/my-domain-lang-mcp/`)
 
 ## Prerequisites
 
@@ -33,7 +34,8 @@ config-service/
 │       ├── urls.py             # API routing (/api/users/, /api/applications/, nested configurations)
 │       ├── tests.py            # 34 tests (model + API)
 │       └── migrations/         # Database migrations
-│   └── knowledge_graph/        # Knowledge graph app (storage, importer, manage.py knowledge CLI, 10 tests)
+│   ├── knowledge_graph/        # Knowledge graph app (storage, importer, manage.py knowledge CLI, 10 tests)
+│   └── my-domain-lang-mcp/     # MCP stdio server (own venv + requirements.txt; Phase 1: handshake only, 6 pytest tests)
 ├── knowledge/                  # Domain knowledge YAML (nodes/ + edges/; source of truth: context/DOMAIN.md)
 └── frontend/
     ├── package.json            # Node dependencies
@@ -241,6 +243,18 @@ python manage.py knowledge related application
 
 The YAML is a projection of `context/DOMAIN.md` — if they disagree, DOMAIN.md wins and the YAML gets corrected.
 
+## MCP Server
+
+`backend/my-domain-lang-mcp/` is a stdio-transport MCP server on the official Python SDK (`mcp` 2.x). Phase 1 completes the MCP handshake with strict protocol-layer error handling (stderr-only logging, JSON-RPC errors for unknown methods and unknown tools, clean disconnect exit) and deliberately exposes **no tools yet** — Phase 2 will surface the knowledge graph. It is a separate pip/venv project with its own exact-pinned `requirements.txt`; also Docker-free:
+
+```bash
+make mcp-install   # create its venv + install dependencies
+make mcp-test      # 6-test pytest suite
+make mcp-run       # run the server on stdio (MCP Inspector / manual poking)
+```
+
+Details, wire-level behaviour, and agent-registration snippet: [backend/my-domain-lang-mcp/README.md](backend/my-domain-lang-mcp/README.md).
+
 ## Running Tests
 
 ```bash
@@ -250,6 +264,8 @@ python manage.py test
 ```
 
 Expected: 44 tests pass (34 api tests: User/Application/Configuration models and API; 10 knowledge_graph tests: import, lookup, related, validate, list-areas).
+
+The MCP server's suite runs separately (different venv and framework): `make mcp-test` — expected 6 pytest tests passing.
 
 ## Stopping Services
 

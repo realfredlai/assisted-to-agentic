@@ -91,6 +91,16 @@ Run every target from `config-service/`. `make` with no arguments lists them all
 | `make knowledge-validate` | Fail if any edge references a missing node |
 | `make knowledge-lookup TERM=…` | Look up a term by id, name, or alias; JSON output. Direct CLI adds `related`, `list-areas`, `--format table` |
 
+### MCP server (no Docker needed)
+
+`backend/my-domain-lang-mcp/` is a **separate pip/venv project** with its own `venv/` and `requirements.txt` (exact pins: `mcp`, `pytest`, `pytest-asyncio`) — `make install` / `make test` do **not** cover it. Its tests are pytest, not Django.
+
+| Command | What it does |
+|---------|--------------|
+| `make mcp-install` | Create `backend/my-domain-lang-mcp/venv` (if missing) and install its dependencies. Idempotent. |
+| `make mcp-test` | Run the MCP server pytest suite — 6 tests as of 2026-08-21 |
+| `make mcp-run` | Run the stdio server in the foreground (for MCP Inspector or manual JSON-RPC poking); Ctrl+C or stdin EOF stops it cleanly |
+
 ### Database lifecycle
 
 | Command | What it does |

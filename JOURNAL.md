@@ -148,3 +148,39 @@
     - Model (LLM model and version): Claude Fable 5
     - Input (file added to the prompt): changes/001-knowledge-graph-cli.md, README/ARCHITECTURE/ENV_SCRIPTS
     - Output (file that contains the response): docs updated in-commit (README knowledge section + 44-test count, ARCHITECTURE knowledge-graph section, ENV_SCRIPTS knowledge targets); commits: 980ba66 (docs: memory framework), a91a4aa (feat: knowledge graph CLI), followed by the purge commit (work item reduced to criteria/decisions/outcome per purge discipline). Next proposed: 002-lint-and-typecheck. Stray unrelated dir config-service/backend/ux-unification-planning/ excluded from all commits and flagged.
+
+18. Entry 18:
+    - Prompt (what we're asking of our assistant): Set up a Python MCP server project (stdio transport, official SDK, handshake only — no tools/resources/prompts yet) at config-service/backend/my-domain-lang-mcp/, with dependency management proposed; follow the four-stage process; study (don't copy) the module-5 domain-lang-mcp reference.
+    - Tool (your AI assistant): Claude Code
+    - Mode (if applicable): Four-stage process — PLAN for work item 002
+    - Context (clean, from previous, etc.): From previous (compacted)
+    - Model (LLM model and version): Claude Fable 5
+    - Input (file added to the prompt): memory/WORKFLOW_STATUS.md, memory/ENV_SCRIPTS.md, assisted-to-agentic-module-5/examples/domain-lang-mcp (pyproject, stdio_server/main.py, main_test.py, tools.py, README), backend/knowledge_graph imports, PyPI mcp release history, mcp v2 migration guide + what's-new docs
+    - Output (file that contains the response): changes/002-mcp-stdio-server.md filled through PLAN — 6 Given-When-Then ACs each naming its test (in-memory handshake/empty-surface/error-survival + subprocess handshake/raw-frame-stderr-discipline/clean-EOF-exit), decisions locked with the user (pip+venv+requirements.txt over recommended uv; mcp SDK v2.x — v2.0.0 released 2026-07-28 renames FastMCP→MCPServer and replaces the v1 test helper with a unified Client, so the v1-idiom reference is translated, not copied), inner package stdio_server/ (hyphenated folder can't be a module), protocol-layer error handling defined as stderr-only logging + clean EOF/SIGINT exit + JSON-RPC-error-and-survive. WORKFLOW_STATUS: active item → 002 stage 1 awaiting sign-off; lint/typecheck proposal renumbered 003; 001 stage-4 close-out flagged as loose end. No production code written.
+
+19. Entry 19:
+    - Prompt (what we're asking of our assistant): build it (PLAN for 002 signed off; execute BUILD & ASSESS)
+    - Tool (your AI assistant): Claude Code
+    - Mode (if applicable): Four-stage process — BUILD & ASSESS for work item 002
+    - Context (clean, from previous, etc.): From previous
+    - Model (LLM model and version): Claude Fable 5
+    - Input (file added to the prompt): changes/002-mcp-stdio-server.md, mcp 2.0.0 package (API probed empirically: MCPServer signature, Client resolution logic, stdio_client, METHOD_NOT_FOUND)
+    - Output (file that contains the response): backend/my-domain-lang-mcp/ — requirements.txt (mcp==2.0.0, pytest==9.1.1, pytest-asyncio==1.4.0), pytest.ini, README.md, stdio_server/main.py (build_server + main with stderr-only logging and clean EOF/SIGINT exit), stdio_server/main_test.py (6 tests: 3 in-memory, 3 subprocess incl. hand-rolled initialize→unknown-method→-32601 exchange); Makefile mcp-install/mcp-test/mcp-run; .gitignore venv entry; ENV_SCRIPTS MCP section; WORKFLOW_STATUS gate row. Deviations: AC4 re-worded + AC5 extended (v2 returns is_error=True for unknown tools, not MCPError — protocol error proof moved to AC5); Client needs stdio_client(params) wrapping (docs implied bare params — TypeError); raw test rewritten incremental after communicate()-based version proved flaky (stdin close raced dispatch). Evidence: make mcp-test 6/6 stable ×5, make test 44/44, mcp-run clean exit 0. Stage 2 awaiting sign-off.
+
+20. Entry 20:
+    - Prompt (what we're asking of our assistant): Spec correction during stage-2 review — MCP classifies an unknown tool in tools/call as a Protocol Error (JSON-RPC -32602), distinct from Tool Execution Errors (isError: true); my BUILD note had wrongly presented the SDK's isError behaviour as "the v2 contract".
+    - Tool (your AI assistant): Claude Code
+    - Mode (if applicable): Four-stage process — BUILD & ASSESS rework for work item 002 (review feedback)
+    - Context (clean, from previous, etc.): From previous
+    - Model (LLM model and version): Claude Fable 5
+    - Input (file added to the prompt): MCP spec Tools § Error Handling (fetched, confirms -32602 for unknown tools), wire-level probe of mcp 2.0.0 (returns {"result":{...,"isError":true}} — spec-noncompliant), SDK source (ToolError in tool_manager.py; ServerMiddleware protocol in mcp/server/context.py — raised MCPError becomes the JSON-RPC error response)
+    - Output (file that contains the response): stdio_server/main.py — unknown_tool_guard middleware appended in build_server(): tools/call naming an unregistered tool now raises MCPError(INVALID_PARAMS, "Unknown tool: <name>") → -32602 on the wire, matching the spec example verbatim. Tests updated: in-memory test asserts MCPError code -32602 + session survival; raw exchange gained a tools/call frame asserting -32602 with no result member. AC4 restored to protocol-error wording (history noted inline), AC5 extended. 6/6 green stable ×5, backend 44/44. Noted: SDK marks middleware "provisional" — safe under the exact mcp==2.0.0 pin. Stage 2 still awaiting sign-off.
+
+21. Entry 21:
+    - Prompt (what we're asking of our assistant): sign off now (stage 2 signed off incl. AC4/AC5 re-confirm; execute REFLECT & ADAPT)
+    - Tool (your AI assistant): Claude Code
+    - Mode (if applicable): Four-stage process — REFLECT & ADAPT for work item 002
+    - Context (clean, from previous, etc.): From previous
+    - Model (LLM model and version): Claude Fable 5
+    - Input (file added to the prompt): changes/002-mcp-stdio-server.md BUILD notes, AGENTS.md
+    - Output (file that contains the response): work item REFLECT & ADAPT section — four frictions dispositioned (v2 docs wrong about Client+StdioServerParameters: fixed via empirical probing; SDK isError behaviour mispresented as protocol contract, caught by user: fixed via middleware; flaky communicate()-based raw test: fixed via incremental exchange, ×5-repeat habit credited; provisional middleware API: accepted under exact mcp==2.0.0 pin, caveat to be carried into ARCHITECTURE.md at stage 4 since work-item deviations get purged). Process change applied: AGENTS.md standing rule — verify third-party SDK/protocol behaviour empirically; the spec is the conformance source of truth. Stage 3 awaiting sign-off.

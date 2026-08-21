@@ -112,6 +112,7 @@ No pagination, filtering, throttling, or auth is configured (`REST_FRAMEWORK` se
   - `ApplicationAPITest` (9): list ordering, create (valid / duplicate name / invalid `app_type` / with users / unknown user id), retrieve, patch `users`, delete cascades its configurations.
   - `ConfigurationAPITest` (10): nested list scoped to its application, create (settings default / non-object settings rejected / duplicate name / same name under another application), retrieve, update via PUT and PATCH, delete, unknown application id 404s list and create, configuration id under the wrong application 404s.
 - Run: `cd config-service/backend && source venv/bin/activate && python manage.py test` — requires the Postgres container up (tests create/destroy a `test_config_service_db`).
+- The MCP server has its own 6-test pytest suite (`make mcp-test`, separate venv, no Postgres) — see [MCP server](#mcp-server-backendmy-domain-lang-mcp) below.
 
 ## Knowledge graph
 
@@ -132,6 +133,16 @@ config-service/knowledge.db       ← SQLite, gitignored, rebuilt at will
 - Each node's `warnings` carry the sharp edges (e.g. `User` is not an auth account; `application` comes from the URL, never the body; there is no Environment entity).
 - New dependency: PyYAML (approved). Make targets: `knowledge-import`, `knowledge-validate`, `knowledge-lookup TERM=…`.
 
+## MCP server (`backend/my-domain-lang-mcp/`)
+
+A stdio-transport MCP server on the official Python SDK (`mcp==2.0.0` — the v2 major: `MCPServer`, unified `Client`), modelled on the Module 5 `domain-lang-mcp` reference but written in v2 idioms (the reference uses the v1 `FastMCP` API). **Phase 1 (current):** completes the initialize handshake, exposes zero tools/resources/prompts, and delivers the stdio protocol discipline — stdout carries only JSON-RPC frames (logging is stderr-only), clean exit 0 on EOF/SIGINT, nonzero + stderr log on unexpected errors. **Phase 2 (planned):** expose `knowledge_graph` as MCP tools — `storage.py`/`importer.py` are Django-free, so the server will import them directly rather than shelling out like the reference; that is why the project sits inside `backend/`.
+
+- A **separate pip/venv project** (own `venv/`, `requirements.txt` with exact pins: `mcp`, `pytest`, `pytest-asyncio`) — deliberately matching the backend's pip convention over the reference's uv. Package is `stdio_server/` (the hyphenated folder name can't be a module; layout mirrors the reference, leaving room for an `http_server` sibling).
+- **Spec-conformance guard:** mcp 2.0.0 deviates from the MCP spec (Tools § Error Handling) by answering `tools/call` for an unknown tool with a tool-execution result (`isError: true`); the spec classifies it as a *protocol* error, JSON-RPC `-32602`. `build_server()` appends an `unknown_tool_guard` middleware that restores spec behaviour, asserted at the wire level by test. It checks the live registered-tool set, so it stays correct when Phase 2 adds real tools (whose *execution* failures still flow as `isError: true` results, as the spec intends).
+- **Caveat:** the SDK marks the middleware signature "provisional — expected to change before v2 is final". Safe under the exact `mcp==2.0.0` pin; re-verify the guard at any deliberate SDK upgrade.
+- 6 pytest tests in `stdio_server/main_test.py`, two levels: in-memory (`Client(server)` — handshake identity, empty surface, `-32602` + session survival) and black-box subprocess (SDK-client handshake over real stdio; a hand-rolled JSON-RPC exchange asserting `-32601` unknown method, `-32602` unknown tool, and stdout purity; clean EOF exit). No Docker needed — like the knowledge CLI, this never touches Postgres.
+- Make targets: `mcp-install`, `mcp-test`, `mcp-run`.
+
 ## Development workflow
 
 Everyday tasks are driven by `config-service/Makefile` (run from `config-service/`; `make` alone lists all targets):
@@ -147,6 +158,7 @@ make superuser   # Django admin account    make shell           # Django shell
 make build       # production frontend build (frontend/dist/)
 make db-destroy  # stop Postgres AND delete all data
 make knowledge-import / knowledge-validate / knowledge-lookup TERM=…   # domain knowledge graph
+make mcp-install / mcp-test / mcp-run                                  # MCP stdio server (separate venv)
 ```
 
 The equivalent manual commands (docker compose / manage.py / npm directly) are documented in `config-service/README.md`.

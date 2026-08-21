@@ -30,3 +30,4 @@ Read at the start of each conversation; load selectively as the task requires.
 - Lint/type-check tooling and CI are planned but do not exist yet — run and report every check that *is* configured (`make test`), and never report one that isn't.
 - Never destroy data (`make db-destroy`, dropping volumes or tables) without explicit permission.
 - Keep docs current in the same commit as the change they describe.
+- When coding against a third-party SDK or protocol, verify behaviour empirically first (inspect signatures, probe wire-level responses) rather than trusting docs or model memory — and for protocol conformance, the spec is the source of truth: an SDK's behaviour is evidence of its implementation, not of the contract. (Added after work item 002, where mcp 2.0.0 both diverged from its docs and deviated from the MCP spec.)

@@ -55,7 +55,8 @@ Implement and validate.
 
   | Check | Command | Status |
   |-------|---------|--------|
-  | Tests | `make test` | ✅ configured — 44 tests |
+  | Tests (backend) | `make test` | ✅ configured — 44 tests |
+  | Tests (MCP server) | `make mcp-test` | ✅ configured — 6 tests (pytest) |
   | Linting | `make lint` | ⏳ not yet — planned |
   | Type checking | `make typecheck` | ⏳ not yet — planned |
 
@@ -115,14 +116,15 @@ After the purge a work item keeps only: title, number, and goal; the acceptance 
 
 ## Active work item
 
-- **Work item:** [`changes/001-knowledge-graph-cli.md`](../changes/001-knowledge-graph-cli.md) — knowledge graph CLI (YAML → SQLite → `manage.py knowledge`)
-- **Stage:** 4 COMMIT & PICK NEXT — **awaiting final sign-off**. Committed (`980ba66` docs framework, `a91a4aa` feature, + purge commit); work item purged to criteria/decisions/outcome.
+- **Work item:** [`changes/002-mcp-stdio-server.md`](../changes/002-mcp-stdio-server.md) — MCP stdio server, Phase 1: handshake only, zero tools/resources/prompts, at `config-service/backend/my-domain-lang-mcp/`
+- **Stage:** 4 COMMIT & PICK NEXT — in progress (stages 1–3 signed off 2026-08-21).
+- **Loose end:** [`changes/001`](../changes/001-knowledge-graph-cli.md) stage 4 still shows *awaiting final sign-off* — committed and purged, only the user's closing word is missing.
 
 ## Current position
 
 - **Branch:** `main` (tracks `origin/main`); no feature branches open — merged branches are deleted after fast-forward.
 - **Health:** backend tests 44/44 green (34 api + 10 knowledge_graph), verified 2026-08-19; `make up` end-to-end verified 2026-08-03.
-- **Uncommitted:** nothing from the workflow. One stray: `config-service/backend/ux-unification-planning/` — an unrelated workspace (own remote), deliberately left untracked; flagged to the user to relocate.
+- **Uncommitted:** the 002 PLAN artifacts (work item, this file, journal entry 18) — they commit at stage 4 per the process. The stray `ux-unification-planning/` directory was relocated by the user (verified gone 2026-08-21).
 
 ## Completed work
 
@@ -151,5 +153,4 @@ Predates the `changes/` convention — the record is the journal entries and com
   Same applies to **CI**, which also does not exist yet: if a pipeline is added, document it in `ENV_SCRIPTS.md` under Environments and say which checks it runs.
 - `JOURNAL.md` entries 1–4 still carry "[enter after the run completes]" in Cost/Reflections (entries 2–4 also omit Tool/Model) — backfill or leave, your call.
 - No seed-data fixture; an empty database shows "No users found." until records are created via the API or admin.
-- **Next work item (proposed):** `002-lint-and-typecheck` — make the BUILD & ASSESS gate real (ruff/mypy/eslint + make targets); needs dependency approval, then a PLAN.
-- **Stray directory:** `config-service/backend/ux-unification-planning/` is an unrelated planning workspace with its own GitHub remote — should move out of this repo.
+- **Next work item (proposed):** `003-lint-and-typecheck` — make the BUILD & ASSESS gate real (ruff/mypy/eslint + make targets); needs dependency approval, then a PLAN. (Renumbered from 002 — the MCP stdio server took that slot when the user requested it 2026-08-21.)

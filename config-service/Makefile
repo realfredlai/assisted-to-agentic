@@ -5,13 +5,16 @@ SHELL := /bin/bash
 PYTHON3 ?= python3
 VENV := backend/venv
 MANAGE := cd backend && venv/bin/python manage.py
+MCP_DIR := backend/my-domain-lang-mcp
+MCP_VENV := $(MCP_DIR)/venv
 
 .DEFAULT_GOAL := help
 
 .PHONY: help install install-backend install-frontend up backend frontend \
         db-up db-down db-destroy db-status migrate makemigrations \
         test superuser shell build clean \
-        knowledge-import knowledge-validate knowledge-lookup
+        knowledge-import knowledge-validate knowledge-lookup \
+        mcp-install mcp-test mcp-run
 
 help: ## List available targets
 	@awk 'BEGIN {FS = ":.*## "} /^[a-zA-Z_-]+:.*## / {printf "  \033[36m%-16s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
@@ -82,6 +85,18 @@ knowledge-validate: ## Check the knowledge graph for missing references
 
 knowledge-lookup: ## Look up TERM in the knowledge graph (make knowledge-lookup TERM=app)
 	$(MANAGE) knowledge lookup "$(TERM)"
+
+## ---------- MCP server (no Docker needed) ----------
+
+mcp-install: ## Create the MCP server venv (if missing) and install its dependencies
+	@test -d $(MCP_VENV) || $(PYTHON3) -m venv $(MCP_VENV)
+	$(MCP_VENV)/bin/pip install -r $(MCP_DIR)/requirements.txt
+
+mcp-test: ## Run the MCP server test suite (pytest)
+	cd $(MCP_DIR) && venv/bin/python -m pytest
+
+mcp-run: ## Run the MCP stdio server (for MCP Inspector or manual protocol poking)
+	cd $(MCP_DIR) && venv/bin/python -m stdio_server.main
 
 clean: ## Remove build artifacts, Python caches, and knowledge.db (keeps venv, node_modules, db data)
 	rm -rf frontend/dist
