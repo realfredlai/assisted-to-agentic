@@ -184,3 +184,12 @@
     - Model (LLM model and version): Claude Fable 5
     - Input (file added to the prompt): changes/002-mcp-stdio-server.md BUILD notes, AGENTS.md
     - Output (file that contains the response): work item REFLECT & ADAPT section — four frictions dispositioned (v2 docs wrong about Client+StdioServerParameters: fixed via empirical probing; SDK isError behaviour mispresented as protocol contract, caught by user: fixed via middleware; flaky communicate()-based raw test: fixed via incremental exchange, ×5-repeat habit credited; provisional middleware API: accepted under exact mcp==2.0.0 pin, caveat to be carried into ARCHITECTURE.md at stage 4 since work-item deviations get purged). Process change applied: AGENTS.md standing rule — verify third-party SDK/protocol behaviour empirically; the spec is the conformance source of truth. Stage 3 awaiting sign-off.
+
+22. Entry 22:
+    - Prompt (what we're asking of our assistant): go for it (stage 3 signed off; execute COMMIT & PICK NEXT)
+    - Tool (your AI assistant): Claude Code
+    - Mode (if applicable): Four-stage process — COMMIT & PICK NEXT for work item 002
+    - Context (clean, from previous, etc.): From previous
+    - Model (LLM model and version): Claude Fable 5
+    - Input (file added to the prompt): changes/002-mcp-stdio-server.md, config-service/README.md, context/ARCHITECTURE.md
+    - Output (file that contains the response): docs updated in-commit (README: tech stack + tree + MCP Server section + test note; ARCHITECTURE: MCP server section carrying the spec-deviation note and provisional-middleware caveat forward past the purge, plus Testing and workflow mentions); commit c602243 (feat: add MCP stdio server, Phase 1 — 15 files, work item with full stage notes intact), followed by the purge commit (work item reduced to goal/stages/decisions/ACs/outcome per discipline). Final verification: make mcp-test 6/6, make test 44/44, tree clean. Next candidates queued: MCP Phase 2 (knowledge-graph tools) or lint-and-typecheck. Stage 4 awaiting final sign-off.

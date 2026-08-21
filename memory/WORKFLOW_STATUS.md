@@ -117,14 +117,14 @@ After the purge a work item keeps only: title, number, and goal; the acceptance 
 ## Active work item
 
 - **Work item:** [`changes/002-mcp-stdio-server.md`](../changes/002-mcp-stdio-server.md) — MCP stdio server, Phase 1: handshake only, zero tools/resources/prompts, at `config-service/backend/my-domain-lang-mcp/`
-- **Stage:** 4 COMMIT & PICK NEXT — in progress (stages 1–3 signed off 2026-08-21).
+- **Stage:** 4 COMMIT & PICK NEXT — **awaiting final sign-off**. Committed `c602243` (feat, full stage notes intact) + purge follow-up; docs updated in-commit; 6/6 + 44/44 green at close.
 - **Loose end:** [`changes/001`](../changes/001-knowledge-graph-cli.md) stage 4 still shows *awaiting final sign-off* — committed and purged, only the user's closing word is missing.
 
 ## Current position
 
 - **Branch:** `main` (tracks `origin/main`); no feature branches open — merged branches are deleted after fast-forward.
-- **Health:** backend tests 44/44 green (34 api + 10 knowledge_graph), verified 2026-08-19; `make up` end-to-end verified 2026-08-03.
-- **Uncommitted:** the 002 PLAN artifacts (work item, this file, journal entry 18) — they commit at stage 4 per the process. The stray `ux-unification-planning/` directory was relocated by the user (verified gone 2026-08-21).
+- **Health:** backend tests 44/44 green + MCP suite 6/6 green, verified 2026-08-21; `make up` end-to-end verified 2026-08-03.
+- **Uncommitted:** nothing from the workflow.
 
 ## Completed work
 
@@ -139,6 +139,7 @@ Predates the `changes/` convention — the record is the journal entries and com
 | 5 | Developer tooling | `config-service/Makefile` | Committed; every target verified | Entry 9 |
 | 6 | Memory framework: procedural + episodic, four-stage process | `memory/*.md`, `changes/TEMPLATE.md` | Committed `980ba66` | Entries 10–14 |
 | 7 | Knowledge graph CLI (first work item under the four-stage process) | `changes/001`, `knowledge/`, `backend/knowledge_graph/` | Committed `a91a4aa` (+ purge commit); 44/44 tests | Entries 15–17 |
+| 8 | MCP stdio server, Phase 1: handshake + protocol-layer error handling (incl. spec-conformance middleware for unknown tools) | `changes/002`, `backend/my-domain-lang-mcp/` | Committed `c602243` (+ purge commit); 6/6 MCP + 44/44 backend tests | Entries 18–22 |
 
 ## Open decisions
 
@@ -153,4 +154,6 @@ Predates the `changes/` convention — the record is the journal entries and com
   Same applies to **CI**, which also does not exist yet: if a pipeline is added, document it in `ENV_SCRIPTS.md` under Environments and say which checks it runs.
 - `JOURNAL.md` entries 1–4 still carry "[enter after the run completes]" in Cost/Reflections (entries 2–4 also omit Tool/Model) — backfill or leave, your call.
 - No seed-data fixture; an empty database shows "No users found." until records are created via the API or admin.
-- **Next work item (proposed):** `003-lint-and-typecheck` — make the BUILD & ASSESS gate real (ruff/mypy/eslint + make targets); needs dependency approval, then a PLAN. (Renumbered from 002 — the MCP stdio server took that slot when the user requested it 2026-08-21.)
+- **Next work item — two candidates queued** (number assigned at pick):
+  1. **MCP Phase 2** — expose `backend/knowledge_graph` as MCP tools (lookup/related/list-areas/validate) via direct import (its modules are Django-free). The user's stated roadmap for the MCP server.
+  2. **lint-and-typecheck** — make the BUILD & ASSESS gate real (ruff/mypy/eslint + make targets); needs dependency approval, then a PLAN.
