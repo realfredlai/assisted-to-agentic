@@ -8,6 +8,8 @@ This document is used as semantic memory for agents to understand the project at
 - Workflow artifacts: `prompts/` (specs → prompt → plan → implementation → upgrade), `JOURNAL.md` (run log)
 - Git repository root: `module1/` (branch `main`)
 - Semantic-memory companions: [DOMAIN.md](DOMAIN.md) (business domain), [ARCHITECTURE.md](ARCHITECTURE.md) (system design), [IMPLEMENTATION.md](IMPLEMENTATION.md) (languages, versions, dependencies, preferences)
+- Procedural memory: [memory/ENV_SCRIPTS.md](../memory/ENV_SCRIPTS.md) (environments, environment variables, developer scripts, and when to go off-script)
+- Episodic memory: [memory/WORKFLOW_STATUS.md](../memory/WORKFLOW_STATUS.md) (the four-stage framework, work-item structure, purge discipline, and where we are; update every run), per-task work items in [changes/](../changes/), and [JOURNAL.md](../JOURNAL.md) as the append-only log
 
 ## justification
 

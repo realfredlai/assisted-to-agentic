@@ -76,3 +76,66 @@
     - Model (LLM model and version): Claude Fable 5
     - Input (file added to the prompt): config-service/README.md, docker-compose.yml, frontend/package.json (existing regular commands)
     - Output (file that contains the response): config-service/Makefile (up, install, test, migrate/makemigrations, backend/frontend, db-up/db-down/db-destroy/db-status, superuser, shell, build, clean); README.md gains a Quick Start (Make) section; context/ARCHITECTURE.md development workflow section now documents the Make targets. Verified: make install, make test (34/34 green), make migrate, make build, and make up (API :8000 and SPA :5173 both 200, then shut down)
+
+10. Entry 10:
+    - Prompt (what we're asking of our assistant): @memory/ENV_SCRIPTS.md, document it.
+    - Tool (your AI assistant): Claude Code
+    - Mode (if applicable): Documentation
+    - Context (clean, from previous, etc.): From previous
+    - Model (LLM model and version): Claude Fable 5
+    - Input (file added to the prompt): memory/ENV_SCRIPTS.md (empty stub), config-service/Makefile
+    - Output (file that contains the response): memory/ENV_SCRIPTS.md — procedural memory (distinct from the semantic memory in context/): environments (prerequisites, services/ports), scripts (all Make targets grouped by purpose, smoke checks), and when to go off-script (no-target operations, port conflicts, dependency changes, bad db state, promote-to-target rule, plus invariants that always hold); context/ABOUT.md links it as procedural memory
+
+11. Entry 11:
+    - Prompt (what we're asking of our assistant): another memory/WORKFLOW_STATUS.md
+    - Tool (your AI assistant): Claude Code
+    - Mode (if applicable): Documentation
+    - Context (clean, from previous, etc.): From previous
+    - Model (LLM model and version): Claude Fable 5
+    - Input (file added to the prompt): git history/status, JOURNAL.md, SDD ledger
+    - Output (file that contains the response): memory/WORKFLOW_STATUS.md — episodic memory (mutable snapshot; JOURNAL.md remains the append-only run log): current position (branch, health, in-flight, uncommitted), completed workflow stages table with commits and journal references, workflow conventions, known loose ends; update-every-run discipline stated in the doc; linked from context/ABOUT.md
+
+12. Entry 12:
+    - Prompt (what we're asking of our assistant): Re WORKFLOW_STATUS.md — adopt a four-stage pattern (PLAN, BUILD & ASSESS, REFLECT & ADAPT, COMMIT & PICK NEXT); document per-stage inputs/outputs and transition rules; only the user marks a stage complete. Also define work item structure (changes/XXX-name.md), acceptance criteria format (Given-When-Then), status tracking (lightweight pointer), and purge discipline.
+    - Tool (your AI assistant): Claude Code
+    - Mode (if applicable): Documentation / process design
+    - Context (clean, from previous, etc.): From previous
+    - Model (LLM model and version): Claude Opus 5
+    - Input (file added to the prompt): memory/WORKFLOW_STATUS.md, assisted-to-agentic-module-1/examples (no work-item template found there), config-service dependency and Makefile inventory
+    - Output (file that contains the response): memory/PROCESS.md (new — procedural: four stages with inputs/outputs/exit rules, sign-off rule that overrides autonomous-execution defaults, work-item structure, Given-When-Then format, status-tracking split, purge discipline, open decision on lint/type-check tooling); changes/TEMPLATE.md (new — work-item template with stage table, GWT criteria naming their tests, per-stage note sections, purge note); memory/WORKFLOW_STATUS.md rewritten as a thin episodic pointer (active work item + stage, current position, completed-work table, open decisions; stale commit hash 9816a2 → 9816aa2 fixed); AGENTS.md rewritten to load the process and the three memory kinds; context/ABOUT.md links PROCESS.md
+
+13. Entry 13:
+    - Prompt (what we're asking of our assistant): Restatement of the memory framework — procedural memory (ENV_SCRIPTS.md) covers environments, environment variables, developer scripts, and when to go off-script; episodic memory (WORKFLOW_STATUS.md) covers the four-stage framework, per-task work items with acceptance criteria/decisions/outcome, and purge-after-commit discipline.
+    - Tool (your AI assistant): Claude Code
+    - Mode (if applicable): Documentation / framework consolidation
+    - Context (clean, from previous, etc.): From previous
+    - Model (LLM model and version): Claude Opus 5
+    - Input (file added to the prompt): settings.py, docker-compose.yml, .gitignore files, CI check (none exists)
+    - Output (file that contains the response): memory/ENV_SCRIPTS.md rewritten to the four prescribed sections (environments incl. "no CI, no staging/production" and the 5173 CORS constraint; environment variables — no .env, so the docker-compose POSTGRES_* values and the Django settings that would otherwise be env vars, with the dev-only SECRET_KEY flagged; developer scripts as tables; when to go off-script + invariants). memory/PROCESS.md (created in entry 12) consolidated back into memory/WORKFLOW_STATUS.md per this framing — the four stages, sign-off rule, work-item structure, Given-When-Then format and purge discipline are now Part 1 of the episodic doc, with the pointer and history as Part 2; PROCESS.md deleted. AGENTS.md, context/ABOUT.md, and changes/TEMPLATE.md re-pointed accordingly
+
+14. Entry 14:
+    - Prompt (what we're asking of our assistant): Confirmed no lint/type-check tooling yet, but it is coming in the near future.
+    - Tool (your AI assistant): Claude Code
+    - Mode (if applicable): Documentation refinement
+    - Context (clean, from previous, etc.): From previous
+    - Model (LLM model and version): Claude Opus 5
+    - Input (file added to the prompt): memory/WORKFLOW_STATUS.md, memory/ENV_SCRIPTS.md, changes/TEMPLATE.md, AGENTS.md
+    - Output (file that contains the response): BUILD & ASSESS gate rewritten to be forward-compatible — a check table (tests ✅ / lint ⏳ / typecheck ⏳) where the rule is "run and report every configured check, never a planned one," so added tooling joins the gate by flipping a row rather than needing a rewrite; open decision reframed from "awaiting your call" to "planned" with a four-point update checklist (requirements/package.json → Makefile targets → ENV_SCRIPTS.md → gate rows) plus the same note for CI; ENV_SCRIPTS.md and changes/TEMPLATE.md and AGENTS.md aligned
+
+15. Entry 15:
+    - Prompt (what we're asking of our assistant): Referring to assisted-to-agentic-module-5/examples/knowledge-graph, implement a similar CLI and knowledge for this project. PLAN signed off with "start build".
+    - Tool (your AI assistant): Claude Code
+    - Mode (if applicable): Four-stage process — PLAN (Opus 5, signed off), then BUILD & ASSESS (Fable 5)
+    - Context (clean, from previous, etc.): From previous
+    - Model (LLM model and version): Claude Opus 5 (plan) / Claude Fable 5 (build)
+    - Input (file added to the prompt): changes/001-knowledge-graph-cli.md, module-5 knowledge-graph reference, context/DOMAIN.md
+    - Output (file that contains the response): backend knowledge_graph app (storage, importer, manage.py knowledge command, 10 tests), config-service/knowledge/ YAML (5 nodes, 6 edges, DOMAIN.md as source of truth), Makefile knowledge-* targets, PyYAML dependency (approved), knowledge.db gitignored. 44/44 tests green. BUILD & ASSESS awaiting sign-off; nothing committed yet.
+
+16. Entry 16:
+    - Prompt (what we're asking of our assistant): sign off stage 2
+    - Tool (your AI assistant): Claude Code
+    - Mode (if applicable): Four-stage process — REFLECT & ADAPT
+    - Context (clean, from previous, etc.): From previous
+    - Model (LLM model and version): Claude Fable 5
+    - Input (file added to the prompt): changes/001-knowledge-graph-cli.md BUILD notes
+    - Output (file that contains the response): work item REFLECT & ADAPT section — four frictions dispositioned (requirements.txt newline: fixed; builtin-shadowing ImportError from reference: fixed; Docker daemon down at gate: fixed via ENV_SCRIPTS.md addition; YAML/DOMAIN.md drift: accepted with mitigations); no process changes proposed. Stage 3 awaiting sign-off.
