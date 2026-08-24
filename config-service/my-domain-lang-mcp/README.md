@@ -66,16 +66,69 @@ make mcp-run       # run the server on stdio
 
 The test suite is hermetic: it builds its own graphs in-process with `Storage` and never shells out to `manage.py`, so it passes with Docker stopped and `knowledge.db` absent.
 
-## Poking it with MCP Inspector
+## Testing it with MCP Inspector
+
+Build the graph first, or every tool will (correctly) report that it has not been built:
 
 ```bash
-cd my-domain-lang-mcp
-npx @modelcontextprotocol/inspector -- venv/bin/python -m stdio_server.main
+cd config-service && make knowledge-import
 ```
 
-Try `lookup_term` with `app`, then `get_related_terms` with `application`, then `lookup_term` with something that does not exist to see the actionable error.
+Then run everything below from **this directory** (`config-service/my-domain-lang-mcp/`) — [`inspector.json`](inspector.json) uses paths relative to it.
+
+> **Why a config file rather than a bare command?** The Inspector's argument parser consumes `-m` as one of its own flags, so `npx @modelcontextprotocol/inspector -- venv/bin/python -m stdio_server.main` launches Python with no module; it then reads JSON-RPC frames on stdin and tries to execute them as source (`NameError: name 'true' is not defined`) before timing out. Any server command containing a flag hits this. `--config`/`--server` is the form that works. The file is read-only to the Inspector (the writable one is `--catalog`), so it is safe to commit — and it doubles as the registration snippet below.
+
+### Web UI
+
+```bash
+npx @modelcontextprotocol/inspector --config inspector.json --server my-domain-lang
+```
+
+It prints a URL of the form `http://127.0.0.1:6274?MCP_INSPECTOR_API_TOKEN=…` — open **that exact URL**; the token is required.
+
+### CLI — one tool at a time
+
+```bash
+npx @modelcontextprotocol/inspector --cli --config inspector.json --server my-domain-lang \
+  --method tools/call --tool-name lookup_term --tool-arg term=app
+```
+
+Swap the tail for each tool:
+
+| Tool | Tail | Expect |
+|---|---|---|
+| `lookup_term` | `--tool-name lookup_term --tool-arg term=app` | `application` / Application, plus 3 warnings |
+| `get_related_terms` | `--tool-name get_related_terms --tool-arg term=application` | 3 outgoing edges: `owns`→Configuration, `classified_by`→AppType, `associated_with`→User |
+| `list_domain_areas` | `--tool-name list_domain_areas` | `["config_storage", "user_directory"]` |
+| `validate_knowledge_graph` | `--tool-name validate_knowledge_graph` | `{"valid": true, "issues": []}` |
+
+`--method tools/list` (no tool name) dumps the whole surface with input and output schemas.
+
+Terms in the shipped graph: `application` (alias `app`), `configuration` (`config`, `config entry`), `user` (`person`, `directory entry`), `app_type` (`application type`), `environment_settings` (`dev settings`, `uat settings`, `prod settings`). Try `term=APP` to see case-insensitive alias resolution.
+
+### The error paths
+
+These are the interesting part — the two channels are meant to behave differently:
+
+```bash
+# tool-execution error: actionable, the model can correct itself
+--method tools/call --tool-name lookup_term --tool-arg term=nonsense_term
+#  -> isError: true, "No domain term matches 'nonsense_term'. Call list_domain_areas ..."
+
+# protocol error: the -32602 argument guard
+--method tools/call --tool-name lookup_term
+#  -> {"error":"Invalid arguments for tool lookup_term: 'term' is a required property"}
+
+# unbuilt graph, without disturbing the real one
+-e KNOWLEDGE_DB=/tmp/nope.db --method tools/call --tool-name list_domain_areas
+#  -> isError: true, names the path and `make knowledge-import` — and creates no file
+```
+
+**One thing the Inspector cannot show you:** `--tool-name not_a_tool` returns *the Inspector's own* "Tool 'not_a_tool' not found on server", because it validates against `tools/list` client-side and never sends the call. The server's `-32602 Unknown tool` response is real but only a raw JSON-RPC frame reaches it — which is what `stdio_server/main_test.py::test_raw_initialize_and_stderr_discipline` does.
 
 ## Registering in a coding agent
+
+Same shape as [`inspector.json`](inspector.json), but with absolute paths — an agent will not be launching it from this directory:
 
 ```json
 {

@@ -101,7 +101,8 @@ Run every target from `config-service/`. `make` with no arguments lists them all
 |---------|--------------|
 | `make mcp-install` | Create `my-domain-lang-mcp/venv` (if missing) and install its dependencies. Idempotent. |
 | `make mcp-test` | Run the MCP server pytest suite — 18 tests as of 2026-08-24. Hermetic: passes with Docker stopped and `knowledge.db` absent |
-| `make mcp-run` | Run the stdio server in the foreground (for MCP Inspector or manual JSON-RPC poking); Ctrl+C or stdin EOF stops it cleanly. Exposes four knowledge-graph tools; run `make knowledge-import` first or they report an unbuilt graph |
+| `make mcp-run` | Run the stdio server in the foreground for manual JSON-RPC poking; Ctrl+C or stdin EOF stops it cleanly. Exposes four knowledge-graph tools; run `make knowledge-import` first or they report an unbuilt graph |
+| *(MCP Inspector)* | `cd my-domain-lang-mcp && npx @modelcontextprotocol/inspector --config inspector.json --server my-domain-lang` (add `--cli --method …` for one-shot calls). The config file is required — the Inspector's parser eats the `-m` in a bare command. See that project's README. |
 
 ### Database lifecycle
 

@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "my-domain-lang": {
+      "command": "venv/bin/python",
+      "args": ["-m", "stdio_server.main"]
+    }
+  }
+}

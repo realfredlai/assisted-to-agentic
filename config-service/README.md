@@ -252,12 +252,14 @@ The YAML is a projection of `context/DOMAIN.md` — if they disagree, DOMAIN.md 
 ```bash
 make mcp-install   # create its venv + install dependencies
 make mcp-test      # 18-test pytest suite (hermetic: no Postgres, no knowledge.db needed)
-make mcp-run       # run the server on stdio (MCP Inspector / manual poking)
+make mcp-run       # run the server on stdio (manual JSON-RPC poking)
 ```
 
 Run `make knowledge-import` first, or the tools will report that the graph has not been built. Set `KNOWLEDGE_DB` to point at a different graph file.
 
-Tool table, error-channel semantics, and the agent-registration snippet: [my-domain-lang-mcp/README.md](my-domain-lang-mcp/README.md).
+To drive it with MCP Inspector, use the committed [my-domain-lang-mcp/inspector.json](my-domain-lang-mcp/inspector.json) — a bare `npx inspector -- venv/bin/python -m ...` does **not** work, because the Inspector's parser eats the `-m`.
+
+Tool table, Inspector commands, error-channel semantics, and the agent-registration snippet: [my-domain-lang-mcp/README.md](my-domain-lang-mcp/README.md).
 
 ## Code Quality
 
