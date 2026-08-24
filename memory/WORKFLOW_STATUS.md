@@ -120,9 +120,15 @@ After the purge a work item keeps only: title, number, and goal; the acceptance 
 
 ## Active work item
 
-- **Work item:** [`changes/005-mcp-server-sibling-layout.md`](../changes/005-mcp-server-sibling-layout.md) — move the MCP server beside `backend/` and `frontend/`.
-- **Stage:** 4 COMMIT & PICK NEXT — **awaiting final sign-off**.
-- **Also awaiting final sign-off:** [`003`](../changes/003-lint-and-typecheck.md) (`5840bfa`) and [`004`](../changes/004-mcp-knowledge-tools.md) (`a82d322`).
+**None in flight.** Three items are built, committed, and purged, each at stage 4 **awaiting final sign-off**:
+
+| Work item | What | Commit |
+|-----------|------|--------|
+| [`003`](../changes/003-lint-and-typecheck.md) | the four-check quality gate (`make check`) | `5840bfa` |
+| [`004`](../changes/004-mcp-knowledge-tools.md) | MCP Phase 2 — the knowledge graph as four tools | `a82d322` |
+| [`005`](../changes/005-mcp-server-sibling-layout.md) | MCP server moved beside `backend/` and `frontend/` | `b8c7811` |
+
+Nothing is queued behind them; see [Open decisions](#open-decisions) for candidates.
 
 ## Current position
 
@@ -143,7 +149,7 @@ Predates the `changes/` convention — the record is the journal entries and com
 | 5 | Developer tooling | `config-service/Makefile` | Committed; every target verified | Entry 9 |
 | 6 | Memory framework: procedural + episodic, four-stage process | `memory/*.md`, `changes/TEMPLATE.md` | Committed `980ba66` | Entries 10–14 |
 | 7 | Knowledge graph CLI (first work item under the four-stage process) | `changes/001`, `knowledge/`, `backend/knowledge_graph/` | Committed `a91a4aa` (+ purge commit); 44/44 tests | Entries 15–17 |
-| 11 | Move the MCP server beside `backend/` and `frontend/` — it is a peer deliverable, not part of the Django project | `changes/005`, `config-service/my-domain-lang-mcp/` | Committed (+ purge); `git mv`, no test changes needed, gate green | Entry 26 |
+| 11 | Move the MCP server beside `backend/` and `frontend/` — it is a peer deliverable, not part of the Django project | `changes/005`, `config-service/my-domain-lang-mcp/` | Committed `b8c7811` (+ purge); `git mv`, no test changes needed, gate green | Entry 26 |
 | 10 | MCP Phase 2: the knowledge graph as four MCP tools, via direct import | `changes/004`, `stdio_server/tools.py` | Committed `a82d322` (+ purge); 18 MCP tests, hermetic | Entry 25 |
 | 9 | Lint + type checking: the four-check quality gate (`make check`) | `changes/003`, `ruff.toml`, `mypy.ini`, `eslint.config.js` | Committed `5840bfa` (+ purge); gates proven able to fail, not just pass | Entry 24 |
 | 8 | MCP stdio server, Phase 1: handshake + protocol-layer error handling (incl. spec-conformance middleware for unknown tools) | `changes/002`, `my-domain-lang-mcp/` (moved there by 005) | Committed `c602243` (+ purge commit); 6/6 MCP + 44/44 backend tests | Entries 18–22 |
