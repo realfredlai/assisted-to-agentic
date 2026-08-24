@@ -102,6 +102,7 @@ Run every target from `config-service/`. `make` with no arguments lists them all
 | `make mcp-install` | Create `my-domain-lang-mcp/venv` (if missing) and install its dependencies. Idempotent. |
 | `make mcp-test` | Run the MCP server pytest suite — 18 tests as of 2026-08-24. Hermetic: passes with Docker stopped and `knowledge.db` absent |
 | `make mcp-run` | Run the stdio server in the foreground for manual JSON-RPC poking; Ctrl+C or stdin EOF stops it cleanly. Exposes four knowledge-graph tools; run `make knowledge-import` first or they report an unbuilt graph |
+| *(register in Claude Code)* | `claude mcp add -s user my-domain-lang -e PYTHONPATH=$MCP -- $MCP/venv/bin/python -m stdio_server.main` where `MCP` is the absolute path to `my-domain-lang-mcp/`. Use `-s user` — the default `local` scope binds to the shell's **cwd at the time of the command**, which once landed this server under an unrelated project. Registered + verified `✔ Connected` 2026-08-25. |
 | *(MCP Inspector)* | `cd my-domain-lang-mcp && npx @modelcontextprotocol/inspector --config inspector.json --server my-domain-lang` (add `--cli --method …` for one-shot calls). The config file is required — the Inspector's parser eats the `-m` in a bare command. See that project's README. |
 
 ### Database lifecycle

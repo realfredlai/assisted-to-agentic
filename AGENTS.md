@@ -8,6 +8,8 @@
 
 Work-item detail lives in `changes/NNN-name.md` (start from `changes/TEMPLATE.md`), never in the status file.
 
+The process is also enforced by the repo skill [`.claude/skills/config-service-sdlc/`](.claude/skills/config-service-sdlc/SKILL.md) — a thin tripwire that triggers on any change work here. The docs above stay the source of truth; if the skill disagrees with them, fix the skill.
+
 ## Memory framework
 
 Read at the start of each conversation; load selectively as the task requires.

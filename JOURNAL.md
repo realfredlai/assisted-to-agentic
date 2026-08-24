@@ -238,3 +238,21 @@
     - Model (LLM model and version): Claude Opus 5
     - Input (file added to the prompt): my-domain-lang-mcp/README.md, MCP Inspector CLI help, the shipped knowledge graph contents
     - Output (file that contains the response): Discovered while answering that the README's documented Inspector command was broken — the Inspector's parser consumes the `-m` flag, so Python starts with no module, reads JSON-RPC on stdin, tries to execute it as source (NameError: name 'true' is not defined) and times out. Any server command containing a flag hits this; neither `--` placement nor target-first ordering recovers it. Fix: committed my-domain-lang-mcp/inspector.json (relative paths, no machine-specific content, read-only to the Inspector since the writable file is --catalog) and rewrote the README section as setup -> web UI -> per-tool CLI table -> error paths, every command executed verbatim before committing. Also documented that the Inspector short-circuits unknown tool names client-side, so its "tool not found" is its own check and never reaches the server's -32602 guard (the raw-frame test covers that). AC3 re-worded during BUILD: the broken command is kept as a labelled anti-pattern rather than deleted, so the failure stays searchable. New AGENTS.md standing rule: run every command you put in a doc before committing it — the doc-level twin of 003's deliberate-failure rule. make check green.
+
+28. Entry 28:
+    - Prompt (what we're asking of our assistant): create the very first SKILL that guardrails the config-service per SDLC practices (via the skill-creator plugin)
+    - Tool (your AI assistant): Claude Code
+    - Mode (if applicable): Four-stage process — work item 007 PLAN
+    - Context (clean, from previous, etc.): From previous
+    - Model (LLM model and version): Claude Fable 5
+    - Input (file added to the prompt): memory/WORKFLOW_STATUS.md, AGENTS.md, changes/TEMPLATE.md, .gitignore + git check-ignore probe (.claude/skills committable; only settings.local.json is ignored, via the user-global ignore), skill-creator plugin instructions
+    - Output (file that contains the response): changes/007-sdlc-guardrails-skill.md — PLAN written and awaiting sign-off. Decisions taken with the human before planning: skill lives in-repo at .claude/skills/config-service-sdlc/, its creation runs as a work item, validation is behavioural subagent evals (3 prompts × with/without the skill, scripted assertions against the copied repo's git state). Design stance recorded in the plan: the skill is a thin enforcement layer that points at WORKFLOW_STATUS.md/AGENTS.md as source of truth rather than duplicating them (anti-drift), and the eval honestly measures the skill's marginal value over the passive docs, since baselines still see AGENTS.md. No production code or skill content written.
+
+29. Entry 29:
+    - Prompt (what we're asking of our assistant): sign off and finish all of them
+    - Tool (your AI assistant): Claude Code
+    - Mode (if applicable): Four-stage process — 003–006 final sign-off recorded; work item 007 BUILD & ASSESS + REFLECT & ADAPT + COMMIT
+    - Context (clean, from previous, etc.): From previous
+    - Model (LLM model and version): Claude Fable 5 (eval subagents: Claude Sonnet 5, headless claude -p)
+    - Input (file added to the prompt): changes/007 PLAN, skill-creator harness conventions (aggregate_benchmark source read to learn its layout), 6 subagent eval runs
+    - Output (file that contains the response): .claude/skills/config-service-sdlc/SKILL.md (52 lines, thin tripwire pointing at WORKFLOW_STATUS.md/AGENTS.md) + evals/evals.json. Evals: 3 prompts x with/without skill in throwaway repo copies, script-graded against git state. With skill 10/10 assertions (100%); baseline 51% — it wrote api/views.py/urls.py/tests.py with no work item (2.07M tokens) and created a commit under "skip the process" pressure, despite AGENTS.md being present in every baseline copy. That is 003's "demonstrate the check failing" rule applied to a skill, and the measured proof that passive docs alone do not steer headless agents. make check green (44 + 18 tests). Also this run: final stage-4 sign-off recorded for 003–006; MCP server re-registered at user scope (local-scope cwd trap documented in ENV_SCRIPTS.md), claude mcp list shows Connected; benchmark viewer HTML delivered for review.

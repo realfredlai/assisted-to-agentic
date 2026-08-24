@@ -120,9 +120,7 @@ After the purge a work item keeps only: title, number, and goal; the acceptance 
 
 ## Active work item
 
-**[`007-sdlc-guardrails-skill`](../changes/007-sdlc-guardrails-skill.md)** — turn the four-stage SDLC into a triggerable skill (`.claude/skills/config-service-sdlc/`) and prove it changes agent behaviour with subagent evals. PLAN signed off 2026-08-25; **in BUILD**.
-
-Work items 003–006 received their final stage-4 sign-off on 2026-08-25 and are closed. Nothing further is queued; see [Open decisions](#open-decisions) for candidates.
+**None in flight.** Work items 003–007 all received sign-off on 2026-08-25 and are closed. Nothing is queued; see [Open decisions](#open-decisions) for candidates.
 
 ## Current position
 
@@ -143,6 +141,7 @@ Predates the `changes/` convention — the record is the journal entries and com
 | 5 | Developer tooling | `config-service/Makefile` | Committed; every target verified | Entry 9 |
 | 6 | Memory framework: procedural + episodic, four-stage process | `memory/*.md`, `changes/TEMPLATE.md` | Committed `980ba66` | Entries 10–14 |
 | 7 | Knowledge graph CLI (first work item under the four-stage process) | `changes/001`, `knowledge/`, `backend/knowledge_graph/` | Committed `a91a4aa` (+ purge commit); 44/44 tests | Entries 15–17 |
+| 13 | SDLC guardrails skill: the four-stage process as a triggerable `.claude/skills/` skill, proven by behavioural subagent evals (with-skill 100% vs baseline 51%; baseline wrote unplanned code and committed under pressure despite AGENTS.md) | `changes/007`, `.claude/skills/config-service-sdlc/` | Committed (+ purge); `make check` green; MCP server registered user-scope in Claude Code | Entries 28–29 |
 | 12 | Inspector config + README fix: the documented Inspector command had never been run and did not work | `changes/006`, `my-domain-lang-mcp/inspector.json` | Committed `19727ca` (+ purge); every documented command executed | Entry 27 |
 | 11 | Move the MCP server beside `backend/` and `frontend/` — it is a peer deliverable, not part of the Django project | `changes/005`, `config-service/my-domain-lang-mcp/` | Committed `b8c7811` (+ purge); `git mv`, no test changes needed, gate green | Entry 26 |
 | 10 | MCP Phase 2: the knowledge graph as four MCP tools, via direct import | `changes/004`, `stdio_server/tools.py` | Committed `a82d322` (+ purge); 18 MCP tests, hermetic | Entry 25 |
@@ -155,8 +154,10 @@ Predates the `changes/` convention — the record is the journal entries and com
 - `JOURNAL.md` entries 1–4 still carry "[enter after the run completes]" in Cost/Reflections (entries 2–4 also omit Tool/Model) — backfill or leave, your call.
 - No seed-data fixture; an empty database shows "No users found." until records are created via the API or admin.
 - **Candidates for the next work item** (none started, no numbers assigned):
-  1. **Register the MCP server in a coding agent and use it in anger** — the tools exist but nothing consumes them yet; real use is what will show whether the descriptions and `warnings` are actually useful.
+  1. **Use the MCP server in anger** — it is now registered user-scope in Claude Code (007's session) and `✔ Connected`; real queries are what will show whether the tool descriptions and `warnings` are actually useful.
   2. **Grow the knowledge graph** — five nodes and six edges cover the domain thinly. This is a `knowledge/*.yaml` content change, not code.
   3. **CI** — the four checks exist but nothing runs them automatically.
   4. **MCP resources** — exposing the `context/` docs as MCP resources is the natural companion to the tools.
+  5. **Hook-based hard enforcement** — 007's skill is advisory; a `settings.json` PreToolUse hook that mechanically blocks commits without sign-off is the escalation if advisory ever proves insufficient (the evals say it currently suffices: with-skill compliance was 10/10).
+  6. **Skill description-trigger optimization** — skill-creator's `run_loop.py` over ~20 realistic queries, deferred from 007.
 - **Deferred inside 003, worth revisiting later:** code formatting (`ruff format` / prettier — a large mechanical diff, kept out so it cannot bury substantive fixes) and `django-stubs` + strict mypy (without stubs, mypy barely checks Django code; the gate row records that rather than overclaiming).
