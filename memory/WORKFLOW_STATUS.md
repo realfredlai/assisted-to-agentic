@@ -56,7 +56,7 @@ Implement and validate.
   | Check | Command | Status |
   |-------|---------|--------|
   | Tests (backend) | `make test` | ✅ configured — 44 tests |
-  | Tests (MCP server) | `make mcp-test` | ✅ configured — 6 tests (pytest) |
+  | Tests (MCP server) | `make mcp-test` | ✅ configured — 18 tests (pytest); hermetic, needs no Docker |
   | Linting | `make lint` | ✅ configured — ruff (all Python) + eslint (`frontend/src/`) |
   | Type checking | `make typecheck` | ✅ configured — mypy, **backend + MCP server**. Caveat: without `django-stubs` it barely checks `backend/api/` (untyped imports become `Any`); real coverage is `knowledge_graph/` and the MCP server. |
 

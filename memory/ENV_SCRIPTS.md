@@ -50,6 +50,8 @@ These are read **only when the `pgdata` volume is first created**. Changing them
 | `CORS_ALLOWED_ORIGINS` | `["http://localhost:5173"]` | The single browser origin allowed to call the API. |
 | `TIME_ZONE` / `LANGUAGE_CODE` | `UTC` / `en-us` | Timestamp and locale handling. |
 
+**MCP server:** one optional variable — **`KNOWLEDGE_DB`**, an absolute path to the knowledge-graph SQLite file. Unset, it defaults to `config-service/knowledge.db`. The test suite sets it to point at temporary graphs; nothing else needs it.
+
 **Frontend:** no `.env` and no `VITE_*` variables. The API base URL is hardcoded in `src/services/api.js` as `http://localhost:8000/api/`; the router uses Vite's built-in `import.meta.env.BASE_URL`.
 
 ## 3. Developer scripts
@@ -98,8 +100,8 @@ Run every target from `config-service/`. `make` with no arguments lists them all
 | Command | What it does |
 |---------|--------------|
 | `make mcp-install` | Create `backend/my-domain-lang-mcp/venv` (if missing) and install its dependencies. Idempotent. |
-| `make mcp-test` | Run the MCP server pytest suite — 6 tests as of 2026-08-21 |
-| `make mcp-run` | Run the stdio server in the foreground (for MCP Inspector or manual JSON-RPC poking); Ctrl+C or stdin EOF stops it cleanly |
+| `make mcp-test` | Run the MCP server pytest suite — 18 tests as of 2026-08-24. Hermetic: passes with Docker stopped and `knowledge.db` absent |
+| `make mcp-run` | Run the stdio server in the foreground (for MCP Inspector or manual JSON-RPC poking); Ctrl+C or stdin EOF stops it cleanly. Exposes four knowledge-graph tools; run `make knowledge-import` first or they report an unbuilt graph |
 
 ### Database lifecycle
 

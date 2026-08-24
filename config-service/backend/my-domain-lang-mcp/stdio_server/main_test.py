@@ -1,17 +1,21 @@
-"""Black-box tests for the Phase-1 stdio server.
+"""Black-box tests for the stdio server's protocol layer.
 
-Two levels:
+Tool *behaviour* lives in `tools_test.py`; this file covers the transport and
+the error channels underneath it, at two levels:
+
 - In-memory: ``Client(server)`` dispatches in-process (no JSON-RPC framing) —
-  proves handshake semantics, the empty capability surface, and error-then-
-  survive behaviour, fast.
+  handshake semantics, the advertised surface, and error-then-survive
+  behaviour, fast.
 - Subprocess: spawn ``sys.executable -m stdio_server.main`` and speak real
-  stdio — the SDK-client handshake, a hand-rolled JSON-RPC exchange asserting
-  stdout carries only protocol frames, and clean exit on client disconnect.
+  stdio — the SDK-client handshake, hand-rolled JSON-RPC exchanges asserting
+  stdout carries only protocol frames, a real tools/call, and clean exit on
+  client disconnect.
 """
 
 from __future__ import annotations
 
 import json
+import os
 import subprocess
 import sys
 import threading
@@ -37,9 +41,21 @@ async def test_handshake_completes_in_memory():
         assert isinstance(client.protocol_version, str) and client.protocol_version
 
 
-async def test_no_tools_resources_or_prompts():
+async def test_exposes_knowledge_tools_but_no_resources_or_prompts():
+    """Replaces work item 002's AC2 (`test_no_tools_resources_or_prompts`).
+
+    Phase 1 asserted an empty tool list — that was its whole point. Phase 2 makes
+    it false by design, so the criterion was changed deliberately rather than the
+    test quietly weakened: resources and prompts are still asserted empty, and the
+    tool list is now pinned to the four knowledge tools.
+    """
     async with Client(build_server()) as client:
-        assert (await client.list_tools()).tools == []
+        assert {t.name for t in (await client.list_tools()).tools} == {
+            "lookup_term",
+            "get_related_terms",
+            "list_domain_areas",
+            "validate_knowledge_graph",
+        }
         assert (await client.list_resources()).resources == []
         assert (await client.list_prompts()).prompts == []
 
@@ -52,7 +68,7 @@ async def test_unknown_tool_yields_protocol_error_not_crash():
         assert exc_info.value.code == types.INVALID_PARAMS
         assert "does_not_exist" in exc_info.value.message
         # the error did not poison the session
-        assert (await client.list_tools()).tools == []
+        assert (await client.list_tools()).tools
 
 
 async def test_handshake_over_real_stdio():
@@ -163,3 +179,77 @@ def test_clean_exit_on_client_disconnect():
     assert proc.returncode == 0
     assert "Traceback" not in err
     assert out == ""
+
+
+def test_raw_tools_call_over_stdio(tmp_path):
+    """A real tools/call across the wire: structured result, stdout stays pure."""
+    from knowledge_graph.storage import Node, Storage
+
+    db = tmp_path / "knowledge.db"
+    store = Storage(db)
+    store.initialize_schema()
+    store.insert_node(
+        Node(
+            id="configuration",
+            type="domain_term",
+            area="config_storage",
+            name="Configuration",
+            definition="A named set of environment settings.",
+            aliases=["config"],
+        )
+    )
+
+    proc = subprocess.Popen(
+        SERVER_CMD,
+        cwd=PROJECT_DIR,
+        env={**os.environ, "KNOWLEDGE_DB": str(db)},
+        stdin=subprocess.PIPE,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+        bufsize=1,
+    )
+    killer = threading.Timer(30, proc.kill)
+    killer.start()
+    try:
+        proc.stdin.write(
+            _frame(
+                {
+                    "jsonrpc": "2.0",
+                    "id": 1,
+                    "method": "initialize",
+                    "params": {
+                        "protocolVersion": types.LATEST_PROTOCOL_VERSION,
+                        "capabilities": {},
+                        "clientInfo": {"name": "raw-test", "version": "0"},
+                    },
+                }
+            )
+        )
+        proc.stdin.flush()
+        proc.stdout.readline()
+        proc.stdin.write(_frame({"jsonrpc": "2.0", "method": "notifications/initialized"}))
+        proc.stdin.write(
+            _frame(
+                {
+                    "jsonrpc": "2.0",
+                    "id": 2,
+                    "method": "tools/call",
+                    "params": {"name": "lookup_term", "arguments": {"term": "config"}},
+                }
+            )
+        )
+        proc.stdin.flush()
+        call_response = json.loads(proc.stdout.readline())
+        proc.stdin.close()
+        returncode = proc.wait(timeout=30)
+        err = proc.stderr.read()
+    finally:
+        killer.cancel()
+
+    assert returncode == 0
+    assert call_response["id"] == 2
+    result = call_response["result"]
+    assert result.get("isError") in (None, False)
+    assert result["structuredContent"]["id"] == "configuration"
+    assert "Traceback" not in err

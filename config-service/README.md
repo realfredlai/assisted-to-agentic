@@ -36,7 +36,7 @@ config-service/
 │       ├── tests.py            # 34 tests (model + API)
 │       └── migrations/         # Database migrations
 │   ├── knowledge_graph/        # Knowledge graph app (storage, importer, manage.py knowledge CLI, 10 tests)
-│   └── my-domain-lang-mcp/     # MCP stdio server (own venv + requirements.txt; Phase 1: handshake only, 6 pytest tests)
+│   └── my-domain-lang-mcp/     # MCP stdio server (own venv + requirements.txt; 4 knowledge tools, 18 pytest tests)
 ├── knowledge/                  # Domain knowledge YAML (nodes/ + edges/; source of truth: context/DOMAIN.md)
 └── frontend/
     ├── package.json            # Node dependencies
@@ -246,15 +246,17 @@ The YAML is a projection of `context/DOMAIN.md` — if they disagree, DOMAIN.md 
 
 ## MCP Server
 
-`backend/my-domain-lang-mcp/` is a stdio-transport MCP server on the official Python SDK (`mcp` 2.x). Phase 1 completes the MCP handshake with strict protocol-layer error handling (stderr-only logging, JSON-RPC errors for unknown methods and unknown tools, clean disconnect exit) and deliberately exposes **no tools yet** — Phase 2 will surface the knowledge graph. It is a separate pip/venv project with its own exact-pinned `requirements.txt`; also Docker-free:
+`backend/my-domain-lang-mcp/` is a stdio-transport MCP server on the official Python SDK (`mcp` 2.x) that exposes the knowledge graph to a coding agent as four tools — `lookup_term`, `get_related_terms`, `list_domain_areas`, `validate_knowledge_graph`. It reads the graph by importing `knowledge_graph.storage` directly (pure stdlib, no Django), and is a separate pip/venv project with its own exact-pinned `requirements.txt`. Docker-free:
 
 ```bash
 make mcp-install   # create its venv + install dependencies
-make mcp-test      # 6-test pytest suite
+make mcp-test      # 18-test pytest suite (hermetic: no Postgres, no knowledge.db needed)
 make mcp-run       # run the server on stdio (MCP Inspector / manual poking)
 ```
 
-Details, wire-level behaviour, and agent-registration snippet: [backend/my-domain-lang-mcp/README.md](backend/my-domain-lang-mcp/README.md).
+Run `make knowledge-import` first, or the tools will report that the graph has not been built. Set `KNOWLEDGE_DB` to point at a different graph file.
+
+Tool table, error-channel semantics, and the agent-registration snippet: [backend/my-domain-lang-mcp/README.md](backend/my-domain-lang-mcp/README.md).
 
 ## Code Quality
 
@@ -281,7 +283,7 @@ python manage.py test
 
 Expected: 44 tests pass (34 api tests: User/Application/Configuration models and API; 10 knowledge_graph tests: import, lookup, related, validate, list-areas).
 
-The MCP server's suite runs separately (different venv and framework): `make mcp-test` — expected 6 pytest tests passing.
+The MCP server's suite runs separately (different venv and framework): `make mcp-test` — expected 18 pytest tests passing.
 
 ## Stopping Services
 

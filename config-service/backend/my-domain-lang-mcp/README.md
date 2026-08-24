@@ -1,52 +1,79 @@
 # my-domain-lang-mcp
 
-An MCP server (stdio transport) for the config-service domain language, built on the official [MCP Python SDK](https://py.sdk.modelcontextprotocol.io/) v2.
+An MCP server (stdio transport) that exposes the config-service **domain language** to a coding agent — so it can ask what `Configuration` means in this codebase instead of assuming. Built on the official [MCP Python SDK](https://py.sdk.modelcontextprotocol.io/) v2.
 
-**Phase 1 (current):** the server completes the MCP initialize handshake and exposes **no tools, resources, or prompts**. What it does deliver is the protocol-layer discipline a stdio server owes its client:
+## Tools
 
-- stdout carries JSON-RPC frames only — all logging goes to stderr;
-- unknown methods are answered with `-32601` (method not found), and a `tools/call` naming an unregistered tool with `-32602` — a **protocol error** per spec (Tools § Error Handling), distinct from tool-execution errors (`isError: true`). mcp 2.0.0 answers unknown tools with an `isError` result instead; a small `unknown_tool_guard` middleware in `build_server()` restores the spec behaviour. The session survives both errors;
-- client disconnect (stdin EOF) and Ctrl+C exit cleanly with code 0; unexpected errors are logged to stderr and exit nonzero.
+| Tool | Purpose |
+|---|---|
+| `lookup_term` | Definition, aliases, **warnings**, source files and docs for one term. Resolves id, display name, or alias, case-insensitively (`application` / `Application` / `app`). |
+| `get_related_terms` | The relationships pointing *out* of a term, each with the target's id and display name. Directed — incoming edges are excluded. |
+| `list_domain_areas` | The distinct areas the domain is partitioned into. Cheap orientation, and the right first call. |
+| `validate_knowledge_graph` | Reports edges pointing at nodes that do not exist. `{valid, issues}`. |
 
-**Phase 2 (next):** expose the sibling [`knowledge_graph`](../knowledge_graph/) package as MCP tools. Its `storage`/`importer` modules are Django-free, so the server will import them directly — no subprocess indirection. That planned wiring is why this project lives inside `backend/`.
+The `warnings` field is the point of the whole thing: several terms mean something specific here (this `User` is **not** `django.contrib.auth`'s user and cannot log in; `Application` is not a Django app).
+
+Read-only. The graph is rebuilt from YAML by `make knowledge-import`, which needs Django and PyYAML — neither of which this venv has.
+
+## How it reaches the graph
+
+It **imports `backend/knowledge_graph.storage` directly**. That module is pure stdlib (sqlite3 + json + pathlib), so no Django and no PyYAML are involved, and the server gets typed objects instead of re-parsed subprocess stdout. This is why the project lives inside `backend/`.
+
+The database path defaults to `config-service/knowledge.db` and is overridden by **`KNOWLEDGE_DB`** — which is how the tests point at temporary graphs without touching the real file. If the graph has not been built, every tool returns an actionable error naming the path and the fix rather than a bare sqlite failure (and, importantly, without leaving an empty database file behind).
+
+## Error channels
+
+The MCP spec (Tools § Error Handling) splits failures in two, and this server keeps them apart — mcp 2.0.0 does not:
+
+| Situation | Answer | Why |
+|---|---|---|
+| Unknown tool name | JSON-RPC **`-32602`** | Protocol error: the request itself is malformed. |
+| Missing or wrong-typed arguments | JSON-RPC **`-32602`** | Same category, per spec. |
+| Unknown domain term | `isError: true` + text naming the term and suggesting `list_domain_areas` | Tool *execution* error: actionable feedback the model can self-correct on. |
+| Graph not built | `isError: true` + the path and `make knowledge-import` | Same — the call was well-formed; the environment isn't ready. |
+
+mcp 2.0.0 answers the first two with `isError` results, which blurs "you called this wrong" into "the tool ran and failed". `spec_conformance_guard` in `main.py` restores the spec behaviour. It validates against each tool's own `input_schema`, and since the SDK does not coerce arguments, it rejects exactly what the SDK would have rejected — only the channel changes.
+
+**Caveat:** the SDK marks its middleware signature "provisional — expected to change before v2 is final". `mcp==2.0.0` is pinned exactly; re-verify the guard at any deliberate upgrade.
 
 ## Layout
 
 ```
 my-domain-lang-mcp/
-├── requirements.txt        # mcp + pytest, exact pins (pip/venv, like the backend)
+├── requirements.txt        # mcp, pytest, pytest-asyncio, mypy — exact pins
 ├── pytest.ini              # *_test.py discovery, asyncio_mode = auto
 ├── venv/                   # created by `make mcp-install` (gitignored)
 └── stdio_server/
-    ├── main.py             # build_server() + main() entry point
-    └── main_test.py        # 6 tests: in-memory handshake + real-stdio black-box
+    ├── main.py             # build_server(): tool registration + the guard
+    ├── tools.py            # the seams + the four tool implementations
+    ├── main_test.py        # protocol layer: handshake, error channels, raw stdio
+    └── tools_test.py       # tool behaviour, against temporary graphs
 ```
 
-The folder name is hyphenated so it cannot be a Python package; the package is `stdio_server`, mirroring the course reference layout (an `http_server` sibling could join it later).
+The folder name is hyphenated so it cannot be a Python package; the package is `stdio_server` (leaving room for an `http_server` sibling).
 
 ## Setup, test, run
 
-From `config-service/` (Docker not required — this project never touches Postgres):
+From `config-service/` — **no Docker needed**, this never touches Postgres:
 
 ```bash
 make mcp-install   # create venv + install dependencies
-make mcp-test      # run the 6-test suite
-make mcp-run       # run the server on stdio (for Inspector / manual poking)
+make mcp-test      # 18 tests
+make mcp-run       # run the server on stdio
 ```
 
-Or manually from this directory: `python3 -m venv venv && venv/bin/pip install -r requirements.txt`, then `venv/bin/python -m pytest` / `venv/bin/python -m stdio_server.main`.
+The test suite is hermetic: it builds its own graphs in-process with `Storage` and never shells out to `manage.py`, so it passes with Docker stopped and `knowledge.db` absent.
 
 ## Poking it with MCP Inspector
 
 ```bash
-npx @modelcontextprotocol/inspector -- backend/my-domain-lang-mcp/venv/bin/python -m stdio_server.main
+cd backend/my-domain-lang-mcp
+npx @modelcontextprotocol/inspector -- venv/bin/python -m stdio_server.main
 ```
 
-(run from `config-service/` with the Inspector's cwd set here, or adjust paths). Expect a successful connect showing server `my-domain-lang-mcp` — and empty tool/resource/prompt lists.
+Try `lookup_term` with `app`, then `get_related_terms` with `application`, then `lookup_term` with something that does not exist to see the actionable error.
 
-## Registering in a coding agent (once Phase 2 lands)
-
-There is nothing to call yet, so registration is documentation-only for now. The shape, for later:
+## Registering in a coding agent
 
 ```json
 {
@@ -60,9 +87,4 @@ There is nothing to call yet, so registration is documentation-only for now. The
 }
 ```
 
-## Tests
-
-Two levels, both in `stdio_server/main_test.py`:
-
-- **In-memory** — the v2 SDK's `Client(server)` dispatches in-process: handshake identity, empty capability surface, unknown-tool `-32602` protocol error that doesn't poison the session.
-- **Black-box subprocess** — spawns `python -m stdio_server.main` and speaks real stdio: SDK-client handshake, a hand-rolled JSON-RPC exchange (initialize → unknown method → `-32601` → unknown tool → `-32602`, asserting stdout purity throughout), and clean EOF exit.
+Run `make knowledge-import` once first, or every tool will (correctly) report that the graph has not been built.

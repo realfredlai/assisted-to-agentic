@@ -8,10 +8,10 @@
 
 | Stage | State | Signed off |
 |-------|-------|------------|
-| 1. PLAN | **awaiting sign-off** | ☐ |
-| 2. BUILD & ASSESS | not started | ☐ |
-| 3. REFLECT & ADAPT | not started | ☐ |
-| 4. COMMIT & PICK NEXT | not started | ☐ |
+| 1. PLAN | signed off 2026-08-24 ("go all the way") | ☑ |
+| 2. BUILD & ASSESS | complete | ☑ |
+| 3. REFLECT & ADAPT | complete | ☑ |
+| 4. COMMIT & PICK NEXT | in progress | ☐ |
 
 ## Inputs
 
@@ -58,37 +58,37 @@ Each of these shaped a decision below and was confirmed by running it, not by re
 
 ### Acceptance criteria
 
-- [ ] **AC1** — Given a connected client, When it lists tools, Then exactly four are returned — `lookup_term`, `get_related_terms`, `list_domain_areas`, `validate_knowledge_graph` — each with a non-empty description and an `outputSchema`.
+- [x] **AC1** — Given a connected client, When it lists tools, Then exactly four are returned — `lookup_term`, `get_related_terms`, `list_domain_areas`, `validate_knowledge_graph` — each with a non-empty description and an `outputSchema`.
       Test: `stdio_server/tools_test.py::test_tool_surface_is_the_four_knowledge_tools`
-- [ ] **AC2** — Given a knowledge database containing a node `application` (name `Application`, alias `app`), When `lookup_term` is called with `application`, `Application`, `APP`, or `app`, Then each returns `structuredContent` whose `id` is `application`, with its definition, aliases, and warnings.
+- [x] **AC2** — Given a knowledge database containing a node `application` (name `Application`, alias `app`), When `lookup_term` is called with `application`, `Application`, `APP`, or `app`, Then each returns `structuredContent` whose `id` is `application`, with its definition, aliases, and warnings.
       Test: `stdio_server/tools_test.py::test_lookup_term_resolves_id_name_and_alias_case_insensitively`
-- [ ] **AC3** — Given that database, When `lookup_term` is called with `nonsense_term`, Then the result is a **tool-execution error** (`is_error=True`) whose message names the term and suggests `list_domain_areas` — and is *not* a JSON-RPC protocol error.
+- [x] **AC3** — Given that database, When `lookup_term` is called with `nonsense_term`, Then the result is a **tool-execution error** (`is_error=True`) whose message names the term and suggests `list_domain_areas` — and is *not* a JSON-RPC protocol error.
       Test: `stdio_server/tools_test.py::test_unknown_term_is_an_actionable_tool_error`
-- [ ] **AC4** — Given a database where `application` has outgoing edges, When `get_related_terms` is called with `application`, Then it returns one record per outgoing edge, each carrying `from`, `to`, `relationship`, and the target's `to_name`; incoming edges are excluded.
+- [x] **AC4** — Given a database where `application` has outgoing edges, When `get_related_terms` is called with `application`, Then it returns one record per outgoing edge, each carrying `from`, `to`, `relationship`, and the target's `to_name`; incoming edges are excluded.
       Test: `stdio_server/tools_test.py::test_get_related_returns_outgoing_edges_with_target_names`
-- [ ] **AC5** — Given a database with nodes in two areas, When `list_domain_areas` is called, Then it returns both area names, sorted and de-duplicated.
+- [x] **AC5** — Given a database with nodes in two areas, When `list_domain_areas` is called, Then it returns both area names, sorted and de-duplicated.
       Test: `stdio_server/tools_test.py::test_list_domain_areas`
-- [ ] **AC6** — Given a database whose edges all resolve, When `validate_knowledge_graph` is called, Then it returns `valid: true` with an empty `issues` list; given one with an edge pointing at a missing node, it returns `valid: false` and an issue naming that node.
+- [x] **AC6** — Given a database whose edges all resolve, When `validate_knowledge_graph` is called, Then it returns `valid: true` with an empty `issues` list; given one with an edge pointing at a missing node, it returns `valid: false` and an issue naming that node.
       Test: `stdio_server/tools_test.py::test_validate_reports_clean_and_broken_graphs`
-- [ ] **AC7** — Given `KNOWLEDGE_DB` pointing at a path that does not exist, When any knowledge tool is called, Then the result is a tool error naming the path and instructing `make knowledge-import` — **and no file is created at that path**.
+- [x] **AC7** — Given `KNOWLEDGE_DB` pointing at a path that does not exist, When any knowledge tool is called, Then the result is a tool error naming the path and instructing `make knowledge-import` — **and no file is created at that path**.
       Test: `stdio_server/tools_test.py::test_missing_database_is_reported_and_creates_no_file`
-- [ ] **AC8** — Given no `KNOWLEDGE_DB` override, When the default database path is resolved, Then it points at `config-service/knowledge.db`.
+- [x] **AC8** — Given no `KNOWLEDGE_DB` override, When the default database path is resolved, Then it points at `config-service/knowledge.db`.
       Test: `stdio_server/tools_test.py::test_default_db_path_resolves_to_config_service_knowledge_db` (path arithmetic only — asserts no file exists, keeping the suite hermetic)
-- [ ] **AC9** — Given a connected client, When `lookup_term` is called with a missing `term`, a non-string `term`, or an unknown tool name, Then each is answered with JSON-RPC protocol error **`-32602`** and the session survives.
+- [x] **AC9** — Given a connected client, When `lookup_term` is called with a missing `term`, a non-string `term`, or an unknown tool name, Then each is answered with JSON-RPC protocol error **`-32602`** and the session survives.
       Test: `stdio_server/main_test.py::test_invalid_arguments_are_protocol_errors` and the existing `test_unknown_tool_yields_protocol_error_not_crash`
-- [ ] **AC10** — Given the subprocess server over real stdio, When a hand-rolled `tools/call` for `lookup_term` is sent after the handshake, Then stdout carries only JSON-RPC frames and the response contains the term's structured content.
+- [x] **AC10** — Given the subprocess server over real stdio, When a hand-rolled `tools/call` for `lookup_term` is sent after the handshake, Then stdout carries only JSON-RPC frames and the response contains the term's structured content.
       Test: `stdio_server/main_test.py::test_raw_tools_call_over_stdio`
-- [ ] **AC11** — Given the whole suite, When `make mcp-test` runs, Then it passes **with Docker stopped and `knowledge.db` absent** — no Postgres, no Django, no generated artefacts. (`mcp-test` has no `db-up` prerequisite, unlike `make test`.)
+- [x] **AC11** — Given the whole suite, When `make mcp-test` runs, Then it passes **with Docker stopped and `knowledge.db` absent** — no Postgres, no Django, no generated artefacts. (`mcp-test` has no `db-up` prerequisite, unlike `make test`.)
       Test: the full `make mcp-test` run, executed with the daemon down and `knowledge.db` moved aside; recorded in BUILD.
 
 ### Tasks
 
-- [ ] T1 — `stdio_server/tools.py`: the `sys.path` + db-path seams, `_open_storage()` with the missing/unbuilt-db handling, and the four tool functions with `TypedDict` returns. (AC2–AC8)
-- [ ] T2 — `main.py`: register the four tools with agent-facing descriptions; extend `unknown_tool_guard` into `spec_conformance_guard` (unknown tool + jsonschema argument validation → `-32602`). (AC1, AC9)
-- [ ] T3 — `tools_test.py`: hermetic fixtures building temp databases via `Storage`; the tool-behaviour tests. (AC1–AC8)
-- [ ] T4 — `main_test.py`: **replace** `test_no_tools_resources_or_prompts` (see Deliberate invalidation), add the invalid-argument and raw `tools/call` tests. (AC1, AC9, AC10)
-- [ ] T5 — Verify with Docker down and `knowledge.db` moved aside. (AC11)
-- [ ] T6 — Docs: the MCP README's tool table and Phase-1/2 framing; `config-service/README.md`, `context/ARCHITECTURE.md`, `ENV_SCRIPTS.md` at stage 4.
+- [x] T1 — `stdio_server/tools.py`: the `sys.path` + db-path seams, `_open_storage()` with the missing/unbuilt-db handling, and the four tool functions with `TypedDict` returns. (AC2–AC8)
+- [x] T2 — `main.py`: register the four tools with agent-facing descriptions; extend `unknown_tool_guard` into `spec_conformance_guard` (unknown tool + jsonschema argument validation → `-32602`). (AC1, AC9)
+- [x] T3 — `tools_test.py`: hermetic fixtures building temp databases via `Storage`; the tool-behaviour tests. (AC1–AC8)
+- [x] T4 — `main_test.py`: **replace** `test_no_tools_resources_or_prompts` (see Deliberate invalidation), add the invalid-argument and raw `tools/call` tests. (AC1, AC9, AC10)
+- [x] T5 — Verify with Docker down and `knowledge.db` moved aside. (AC11)
+- [x] T6 — Docs: the MCP README's tool table and Phase-1/2 framing; `config-service/README.md`, `context/ARCHITECTURE.md`, `ENV_SCRIPTS.md` at stage 4.
 
 ### Deliberate invalidation of a prior acceptance criterion
 
@@ -133,13 +133,49 @@ None. The design questions that existed (subprocess vs direct import, structured
 
 ## 2. BUILD & ASSESS
 
-> Fill in during implementation.
-
-**Implemented:**
+**Implemented:** `stdio_server/tools.py` — the `sys.path` and `KNOWLEDGE_DB` seams, `_storage()` with existence-check-first handling, and the four tools returning `TypedDict`s. `main.py` registers them with agent-facing descriptions and carries `spec_conformance_guard` (unknown tool **and** jsonschema argument validation → `-32602`); server version bumped to 0.2.0. `tools_test.py` adds 11 tests against temporary in-process graphs; `main_test.py` gains a raw `tools/call` over real stdio and has its empty-surface test replaced. **18 tests total.** Docs rewritten: the MCP README (tool table, error-channel table, how it reaches the graph), `config-service/README.md`, `context/ARCHITECTURE.md`, `ENV_SCRIPTS.md` (incl. `KNOWLEDGE_DB`).
 
 **Deviations from plan:**
 
+1. **Tool functions are synchronous.** The reference's are `async`, and the plan inherited that shape without arguing it. But every one of these does a short blocking sqlite read — `async def` would add ceremony and an unfulfilled promise of concurrency. The SDK accepts sync handlers; registration and behaviour are otherwise identical.
+2. **Two tests beyond the planned list.** `test_valid_arguments_still_pass_the_guard` (the guard must not reject anything the SDK would have accepted — the risk the PLAN probe identified, now pinned by a test rather than a one-off measurement) and `test_tool_results_are_json_serialisable` (structured content must survive a JSON round-trip for any client).
+3. **A `# noqa: E402` I added defensively in `tools_test.py` was wrong** and `RUF100` (unused-noqa) caught it — that file has no `sys.path` insert of its own, so the import is not late. Removed.
+
+**The 003 gate immediately earned itself** by finding three real defects in this item's own new code that I had not noticed: `E501` (a 106-char line in `tools.py`), `I001` (unsorted imports in `tools_test.py`), and the `RUF100` above. All fixed. mypy also confirmed the `MYPYPATH` wiring works in production, not just in 003's throwaway probe: it now type-checks **5** MCP source files with `knowledge_graph.storage` genuinely resolved.
+
 **Verification evidence:**
+
+```
+$ make check
+All checks passed!                              # ruff, all Python
+(eslint src --max-warnings 0)                   # exit 0
+Success: no issues found in 21 source files     # mypy backend
+Success: no issues found in 5 source files      # mypy MCP server
+Ran 44 tests in 0.226s / OK                     # backend
+18 passed in 2.19s                              # MCP server
+All checks passed.
+```
+
+AC11 — hermetic, with the Postgres container stopped **and** `knowledge.db` moved aside:
+
+```
+$ make db-down && mv knowledge.db /tmp/
+$ docker ps | grep -c config-service   ->  0
+$ make mcp-test
+stdio_server/tools_test.py ...........
+============================== 18 passed in 2.14s ==============================
+```
+
+Wire-level behaviour over real stdio (from `test_raw_tools_call_over_stdio` and the in-memory client):
+
+```
+tools/call lookup_term {"term":"config"}   -> result.structuredContent.id == "configuration"
+tools/call invalid_tool_name               -> error -32602 "Unknown tool: invalid_tool_name"
+lookup_term {}                             -> error -32602 "Invalid arguments ... 'term' is a required property"
+lookup_term {"term": 123}                  -> error -32602 "Invalid arguments ... 123 is not of type 'string'"
+lookup_term {"term": "nonsense"}           -> isError: true, "No domain term matches 'nonsense'. Call list_domain_areas ..."
+KNOWLEDGE_DB=/missing.db lookup_term       -> isError: true, names the path + "make knowledge-import"; no file created
+```
 
 ---
 
@@ -147,11 +183,14 @@ None. The design questions that existed (subprocess vs direct import, structured
 
 | Friction | Disposition |
 |----------|-------------|
-| | |
+| **None of the significant design questions cost rework** — the direct-import viability, the empty-file-on-missing-db trap, `TypedDict`-vs-`dict` for structured output, and whether the argument guard was safe were all settled by probing during PLAN. BUILD was largely transcription. | **Accepted, and worth naming as the pattern that worked.** Compare work item 002, where an unverified assumption about SDK behaviour became a full rework cycle. The `AGENTS.md` rule written after 002 is what produced this run's smoother one; no further change needed. |
+| **Ordering 003 before 004 paid off immediately** — the gate caught three defects in 004's own code (E501, I001, RUF100) within minutes of the files existing. | **Accepted** — evidence that the proposed reordering was the right call. Had 004 gone first, those defects would have been swept up in 003's bulk cleanup and attributed to pre-existing debt. |
+| **My own defensive `# noqa` was wrong.** I added `E402` to `tools_test.py` by pattern-matching on `tools.py` rather than reasoning about that file. `RUF100` caught it. | **Fixed now.** Small, but the general shape — copying a suppression without re-checking whether its cause applies — is how suppressions metastasise. Worth noticing that the linter, not the author, caught it. |
+| **004 invalidated an earlier item's acceptance criterion**, which the framework had no explicit procedure for beyond "change it deliberately, note it, and re-confirm". | **Fixed now** — handled by replacing the test under a docstring that states what it replaces and why, and recording it in the plan under *Deliberate invalidation*. The existing rule proved sufficient; no framework change needed. |
 
-**Adjustments to remaining tasks:**
+**Adjustments to remaining tasks:** none.
 
-**Process or doc changes:**
+**Process or doc changes:** none proposed. The two rules added by 002 and 003 (verify SDK behaviour empirically; a work item adding a check must demonstrate it failing) both did their jobs this run — the reflection is that they worked, not that more are needed.
 
 ---
 
