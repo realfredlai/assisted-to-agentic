@@ -120,17 +120,9 @@ After the purge a work item keeps only: title, number, and goal; the acceptance 
 
 ## Active work item
 
-**Two work items are in flight, both at stage 1 — PLAN, awaiting sign-off** (the user asked for both on 2026-08-24; that instruction also carries the dependency approval 003 was blocked on).
-
-- [`changes/003-lint-and-typecheck.md`](../changes/003-lint-and-typecheck.md) — make the BUILD & ASSESS gate real: ruff + mypy + eslint, `make lint` / `typecheck` / `check`.
-- [`changes/004-mcp-knowledge-tools.md`](../changes/004-mcp-knowledge-tools.md) — MCP Phase 2: expose the knowledge graph as four tools via direct import of `knowledge_graph.storage`.
-
-**Proposed order: 003 first, then 004** — so 004's new code is written under a real gate and the existing-violation cleanup happens once rather than twice. The user listed them the other way round; this is a proposal, freely reversible at sign-off (the numbering follows the proposed order, nothing else depends on it).
-
-Cross-dependencies to keep in view:
-
-- 004 replaces work item 002's AC2 test (`test_no_tools_resources_or_prompts`) by design — noted in 004 under *Deliberate invalidation*.
-- **The two items touch at one point:** 004's `tools.py` needs a `sys.path.insert` before importing `knowledge_graph.storage`, which trips ruff **E402** and defeats mypy's import resolution (both measured). Whichever item is built **first** owns the fix — inline `# noqa: E402` plus `mypy_path` in `mypy.ini`. Written into 003's plan on the assumption it goes first; flagged in 004 for the reverse. Without it, 003 signs off green and 004 breaks the gate the next day.
+- **Work item:** [`changes/004-mcp-knowledge-tools.md`](../changes/004-mcp-knowledge-tools.md) — MCP Phase 2: the knowledge graph as four MCP tools.
+- **Stage:** 2 BUILD & ASSESS — in progress. PLAN signed off 2026-08-24 ("go all the way").
+- **Just landed:** [`changes/003`](003-lint-and-typecheck.md) — the quality gate, commit `5840bfa`; stage 4 awaiting final sign-off.
 
 ## Current position
 
@@ -151,6 +143,7 @@ Predates the `changes/` convention — the record is the journal entries and com
 | 5 | Developer tooling | `config-service/Makefile` | Committed; every target verified | Entry 9 |
 | 6 | Memory framework: procedural + episodic, four-stage process | `memory/*.md`, `changes/TEMPLATE.md` | Committed `980ba66` | Entries 10–14 |
 | 7 | Knowledge graph CLI (first work item under the four-stage process) | `changes/001`, `knowledge/`, `backend/knowledge_graph/` | Committed `a91a4aa` (+ purge commit); 44/44 tests | Entries 15–17 |
+| 9 | Lint + type checking: the four-check quality gate (`make check`) | `changes/003`, `ruff.toml`, `mypy.ini`, `eslint.config.js` | Committed `5840bfa` (+ purge); gates proven able to fail, not just pass | Entry 24 |
 | 8 | MCP stdio server, Phase 1: handshake + protocol-layer error handling (incl. spec-conformance middleware for unknown tools) | `changes/002`, `backend/my-domain-lang-mcp/` | Committed `c602243` (+ purge commit); 6/6 MCP + 44/44 backend tests | Entries 18–22 |
 
 ## Open decisions
