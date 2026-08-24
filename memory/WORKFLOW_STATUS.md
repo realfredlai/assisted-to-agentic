@@ -120,15 +120,18 @@ After the purge a work item keeps only: title, number, and goal; the acceptance 
 
 ## Active work item
 
-- **Work item:** [`changes/004-mcp-knowledge-tools.md`](../changes/004-mcp-knowledge-tools.md) — MCP Phase 2: the knowledge graph as four MCP tools.
-- **Stage:** 2 BUILD & ASSESS — in progress. PLAN signed off 2026-08-24 ("go all the way").
-- **Just landed:** [`changes/003`](003-lint-and-typecheck.md) — the quality gate, commit `5840bfa`; stage 4 awaiting final sign-off.
+**None in flight.** Both items the user queued on 2026-08-24 are built, committed, and purged; each is at stage 4 **awaiting final sign-off**:
+
+- [`changes/003-lint-and-typecheck.md`](../changes/003-lint-and-typecheck.md) — the quality gate, commit `5840bfa`.
+- [`changes/004-mcp-knowledge-tools.md`](../changes/004-mcp-knowledge-tools.md) — MCP Phase 2, commit `a82d322`.
+
+Nothing is queued behind them. See [Open decisions](#open-decisions) for the candidates worth considering next.
 
 ## Current position
 
 - **Branch:** `main` (tracks `origin/main`); no feature branches open — merged branches are deleted after fast-forward.
-- **Health:** backend tests 44/44 green + MCP suite 6/6 green, verified 2026-08-21; `make up` end-to-end verified 2026-08-03.
-- **Uncommitted:** the 003 + 004 PLAN artifacts (two work items, this file, journal entry 23) — they commit at each item's stage 4 per the process.
+- **Health:** `make check` green end to end, verified 2026-08-24 — ruff + eslint clean, mypy clean (21 backend + 5 MCP files), 44 backend tests, 18 MCP tests. `make up` end-to-end verified 2026-08-03.
+- **Uncommitted:** nothing.
 
 ## Completed work
 
@@ -143,6 +146,7 @@ Predates the `changes/` convention — the record is the journal entries and com
 | 5 | Developer tooling | `config-service/Makefile` | Committed; every target verified | Entry 9 |
 | 6 | Memory framework: procedural + episodic, four-stage process | `memory/*.md`, `changes/TEMPLATE.md` | Committed `980ba66` | Entries 10–14 |
 | 7 | Knowledge graph CLI (first work item under the four-stage process) | `changes/001`, `knowledge/`, `backend/knowledge_graph/` | Committed `a91a4aa` (+ purge commit); 44/44 tests | Entries 15–17 |
+| 10 | MCP Phase 2: the knowledge graph as four MCP tools, via direct import | `changes/004`, `stdio_server/tools.py` | Committed `a82d322` (+ purge); 18 MCP tests, hermetic | Entry 25 |
 | 9 | Lint + type checking: the four-check quality gate (`make check`) | `changes/003`, `ruff.toml`, `mypy.ini`, `eslint.config.js` | Committed `5840bfa` (+ purge); gates proven able to fail, not just pass | Entry 24 |
 | 8 | MCP stdio server, Phase 1: handshake + protocol-layer error handling (incl. spec-conformance middleware for unknown tools) | `changes/002`, `backend/my-domain-lang-mcp/` | Committed `c602243` (+ purge commit); 6/6 MCP + 44/44 backend tests | Entries 18–22 |
 
@@ -151,4 +155,9 @@ Predates the `changes/` convention — the record is the journal entries and com
 - **CI still does not exist.** Lint and type checking now run locally (003), but nothing runs them automatically. If a pipeline is added, document it in `ENV_SCRIPTS.md` under Environments and say which checks it runs.
 - `JOURNAL.md` entries 1–4 still carry "[enter after the run completes]" in Cost/Reflections (entries 2–4 also omit Tool/Model) — backfill or leave, your call.
 - No seed-data fixture; an empty database shows "No users found." until records are created via the API or admin.
+- **Candidates for the next work item** (none started, no numbers assigned):
+  1. **Register the MCP server in a coding agent and use it in anger** — the tools exist but nothing consumes them yet; real use is what will show whether the descriptions and `warnings` are actually useful.
+  2. **Grow the knowledge graph** — five nodes and six edges cover the domain thinly. This is a `knowledge/*.yaml` content change, not code.
+  3. **CI** — the four checks exist but nothing runs them automatically.
+  4. **MCP resources** — exposing the `context/` docs as MCP resources is the natural companion to the tools.
 - **Deferred inside 003, worth revisiting later:** code formatting (`ruff format` / prettier — a large mechanical diff, kept out so it cannot bury substantive fixes) and `django-stubs` + strict mypy (without stubs, mypy barely checks Django code; the gate row records that rather than overclaiming).
