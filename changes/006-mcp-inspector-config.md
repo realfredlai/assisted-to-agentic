@@ -9,7 +9,7 @@
 | 1. PLAN | complete | ☑ |
 | 2. BUILD & ASSESS | complete | ☑ |
 | 3. REFLECT & ADAPT | complete | ☑ |
-| 4. COMMIT & PICK NEXT | **awaiting final sign-off** | ☐ |
+| 4. COMMIT & PICK NEXT | complete | ☑ |
 
 ## The bug
 

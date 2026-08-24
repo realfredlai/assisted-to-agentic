@@ -9,7 +9,7 @@
 | 1. PLAN | complete | ☑ signed off by user ("go all the way", 2026-08-24) |
 | 2. BUILD & ASSESS | complete | ☑ |
 | 3. REFLECT & ADAPT | complete | ☑ |
-| 4. COMMIT & PICK NEXT | **awaiting final sign-off** | ☐ |
+| 4. COMMIT & PICK NEXT | complete | ☑ |
 
 ## Decisions
 

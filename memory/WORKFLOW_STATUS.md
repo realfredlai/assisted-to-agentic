@@ -120,16 +120,9 @@ After the purge a work item keeps only: title, number, and goal; the acceptance 
 
 ## Active work item
 
-**None in flight.** Four items are built, committed, and purged, each at stage 4 **awaiting final sign-off**:
+**[`007-sdlc-guardrails-skill`](../changes/007-sdlc-guardrails-skill.md)** — turn the four-stage SDLC into a triggerable skill (`.claude/skills/config-service-sdlc/`) and prove it changes agent behaviour with subagent evals. PLAN signed off 2026-08-25; **in BUILD**.
 
-| Work item | What | Commit |
-|-----------|------|--------|
-| [`003`](../changes/003-lint-and-typecheck.md) | the four-check quality gate (`make check`) | `5840bfa` |
-| [`004`](../changes/004-mcp-knowledge-tools.md) | MCP Phase 2 — the knowledge graph as four tools | `a82d322` |
-| [`005`](../changes/005-mcp-server-sibling-layout.md) | MCP server moved beside `backend/` and `frontend/` | `b8c7811` |
-| [`006`](../changes/006-mcp-inspector-config.md) | Inspector config; fixed a README command that had never been run | `19727ca` |
-
-Nothing is queued behind them; see [Open decisions](#open-decisions) for candidates.
+Work items 003–006 received their final stage-4 sign-off on 2026-08-25 and are closed. Nothing further is queued; see [Open decisions](#open-decisions) for candidates.
 
 ## Current position
 
