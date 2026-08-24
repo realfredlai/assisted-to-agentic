@@ -193,3 +193,21 @@
     - Model (LLM model and version): Claude Fable 5
     - Input (file added to the prompt): changes/002-mcp-stdio-server.md, config-service/README.md, context/ARCHITECTURE.md
     - Output (file that contains the response): docs updated in-commit (README: tech stack + tree + MCP Server section + test note; ARCHITECTURE: MCP server section carrying the spec-deviation note and provisional-middleware caveat forward past the purge, plus Testing and workflow mentions); commit c602243 (feat: add MCP stdio server, Phase 1 — 15 files, work item with full stage notes intact), followed by the purge commit (work item reduced to goal/stages/decisions/ACs/outcome per discipline). Final verification: make mcp-test 6/6, make test 44/44, tree clean. Next candidates queued: MCP Phase 2 (knowledge-graph tools) or lint-and-typecheck. Stage 4 awaiting final sign-off.
+
+23. Entry 23:
+    - Prompt (what we're asking of our assistant): sign off 001's stage 4, and implement both MCP Phase 2 and lint-and-typecheck
+    - Tool (your AI assistant): Claude Code
+    - Mode (if applicable): Four-stage process — 001 closed; PLAN for two new work items (003, 004)
+    - Context (clean, from previous, etc.): From previous
+    - Model (LLM model and version): Claude Opus 5
+    - Input (file added to the prompt): changes/001, knowledge_graph/storage.py, frontend/package.json, empirical probes (mcp 2.0 tool decorator/structured output/ToolError/argument coercion; jsonschema as a declared mcp dep; ruff 0.16.4 + mypy 2.3.1 + eslint 10.9.0 versions and violation counts against the real codebase)
+    - Output (file that contains the response): changes/001 stage 4 ticked (signed off). Two PLANs written, both awaiting sign-off: changes/003-lint-and-typecheck.md (ruff/mypy/eslint, make lint/lint-fix/typecheck/check, 8 ACs including deliberate-failure checks so a misconfigured gate cannot pass vacuously; formatting and django-stubs deferred; honest gate-row caveat that mypy without stubs barely checks Django) and changes/004-mcp-knowledge-tools.md (four tools via direct import of knowledge_graph.storage, TypedDict structured output, ToolError for not-found vs -32602 for protocol errors, guard extended to invalid arguments after verifying the SDK does not coerce, hermetic tests, 11 ACs). Six planning facts verified empirically rather than assumed — notably that a missing knowledge.db makes sqlite create an empty file then raise OperationalError, and that mcp 2.0.0 also deviates from spec on invalid arguments. Proposed order 003 → 004 (user listed them the other way; reversible at sign-off). No production code written.
+
+24. Entry 24:
+    - Prompt (what we're asking of our assistant): go all the way (both work items end to end, sign-off only at close)
+    - Tool (your AI assistant): Claude Code
+    - Mode (if applicable): Four-stage process — work item 003 BUILD & ASSESS + REFLECT & ADAPT + COMMIT
+    - Context (clean, from previous, etc.): From previous
+    - Model (LLM model and version): Claude Opus 5
+    - Input (file added to the prompt): changes/003-lint-and-typecheck.md, backend + frontend sources, ruff/mypy/eslint output
+    - Output (file that contains the response): ruff.toml + mypy.ini + frontend/eslint.config.js; ruff==0.16.4 and mypy==2.3.1 pinned (mypy in both venvs at the same version), eslint 10 + eslint-plugin-vue 10 + @eslint/js + globals as frontend devDeps; make lint/lint-fix/typecheck/check. All 18 ruff violations and 1 real eslint error fixed (unused catch binding); ALLOWED_HOSTS annotated after a genuine mypy catch. Deviations: vue flat/recommended -> flat/essential (recommended produced 112 formatting warnings, out of scope by plan); RUF012 scoped off Django/DRF declarative Meta classes rather than fixed; mypy path moved from mypy.ini to MYPYPATH in the Makefile (mypy_path is cwd-relative and the MCP run happens from a subdirectory). Both gates proven able to FAIL (introduced unused import -> exit 2; introduced bad return type -> exit 2) then reverted. 004's import seam pre-verified with a throwaway probe plus a negative control proving ignore_missing_imports=False fails loudly. Framework change: a work item that adds a check must demonstrate that check failing. make check green end to end.

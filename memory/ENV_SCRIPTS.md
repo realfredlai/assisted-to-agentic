@@ -45,7 +45,7 @@ These are read **only when the `pgdata` volume is first created**. Changing them
 |---------|-------|----------|
 | `SECRET_KEY` | a `django-insecure-…` literal committed to the repo | Cryptographic signing. Development-only by construction; must never be reused in a deployed environment. |
 | `DEBUG` | `True` | Verbose error pages, no template caching. Never `True` outside local dev. |
-| `ALLOWED_HOSTS` | `[]` | Empty is valid only because `DEBUG=True`; any deployment must populate it. |
+| `ALLOWED_HOSTS` | `list[str] = []` | Empty is valid only because `DEBUG=True`; any deployment must populate it. (Annotated for mypy — an unannotated `[]` is an error under `make typecheck`.) |
 | `DATABASES["default"]` | `config_service_db` / `postgres` / `postgres` @ `localhost:5432` | Must match the docker-compose values above — they are two copies of the same facts, so change them together. |
 | `CORS_ALLOWED_ORIGINS` | `["http://localhost:5173"]` | The single browser origin allowed to call the API. |
 | `TIME_ZONE` / `LANGUAGE_CODE` | `UTC` / `en-us` | Timestamp and locale handling. |
@@ -93,7 +93,7 @@ Run every target from `config-service/`. `make` with no arguments lists them all
 
 ### MCP server (no Docker needed)
 
-`backend/my-domain-lang-mcp/` is a **separate pip/venv project** with its own `venv/` and `requirements.txt` (exact pins: `mcp`, `pytest`, `pytest-asyncio`) — `make install` / `make test` do **not** cover it. Its tests are pytest, not Django.
+`backend/my-domain-lang-mcp/` is a **separate pip/venv project** with its own `venv/` and `requirements.txt` (exact pins: `mcp`, `pytest`, `pytest-asyncio`, `mypy`) — `make install` / `make test` do **not** cover it. Its tests are pytest, not Django.
 
 | Command | What it does |
 |---------|--------------|
@@ -110,13 +110,27 @@ Run every target from `config-service/`. `make` with no arguments lists them all
 | `make db-status` | Container status |
 | `make db-destroy` | **Destructive** — stops Postgres and deletes the volume and all data. Requires explicit permission every time. |
 
-### Linting and type checking — planned, not yet configured
+### Linting and type checking
 
-There is no ruff, flake8, black, or mypy in `requirements.txt`, and no eslint or prettier in `package.json` (both were declined when the Vue project was scaffolded). There is no `make lint` and no `make typecheck`.
+Configured 2026-08-24. `lint`, `lint-fix`, and `typecheck` need no Docker; `check` does, because it includes `make test`.
 
-**Never report a lint or type-check pass — there is nothing to run.** Do not silently add the tooling either; it means new dependencies, which needs approval.
+| Command | What it does |
+|---------|--------------|
+| `make lint` | `ruff check` over all Python (backend + MCP server) and `eslint` over `frontend/src/` (13 files). Zero warnings tolerated — the eslint run uses `--max-warnings 0`. |
+| `make lint-fix` | Applies only the fixes ruff and eslint consider safe; re-run `make lint` afterwards |
+| `make typecheck` | `mypy` **twice** — once for the backend, once for the MCP server from its own venv (its `mcp`/`pytest` imports only resolve there) |
+| `make check` | The whole gate: lint + typecheck + `make test` + `make mcp-test`. **Needs Docker**, because `make test` starts the database. |
 
-This is expected to change: the tooling is planned. **When it is added, replace this section with the real commands** and follow the update checklist in [WORKFLOW_STATUS.md](WORKFLOW_STATUS.md#open-decisions) so the Makefile, this doc, and the BUILD & ASSESS gate all move together.
+Config lives in `config-service/ruff.toml` and `config-service/mypy.ini` (this repo has no `pyproject.toml`), and `frontend/eslint.config.js`.
+
+**What these checks do and do not cover — read before quoting a clean run as evidence:**
+
+- **mypy without `django-stubs` barely checks Django code.** Untyped framework imports become `Any`, so `backend/api/` passes largely by default. The real coverage is `knowledge_graph/` and the MCP server. Adding `django-stubs` and strict mode is deferred.
+- **No formatting check.** `ruff format` and prettier are deliberately not wired up; eslint uses vue's `flat/essential` (correctness) rather than `flat/recommended` (which bundles whitespace opinions).
+- **The frontend has no type checking** — there is no TypeScript in this project, so `make typecheck` is Python-only.
+- **Still no CI.** These run when someone runs them.
+
+`ruff.toml` pins an explicit `select` list because ruff's implicit defaults shift between releases; both tools are pinned exactly, and **mypy is pinned at the same version in two requirements files** (`backend/` and `backend/my-domain-lang-mcp/`) — change them together.
 
 ### Smoke checks
 

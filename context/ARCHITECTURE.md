@@ -143,6 +143,21 @@ A stdio-transport MCP server on the official Python SDK (`mcp==2.0.0` — the v2
 - 6 pytest tests in `stdio_server/main_test.py`, two levels: in-memory (`Client(server)` — handshake identity, empty surface, `-32602` + session survival) and black-box subprocess (SDK-client handshake over real stdio; a hand-rolled JSON-RPC exchange asserting `-32601` unknown method, `-32602` unknown tool, and stdout purity; clean EOF exit). No Docker needed — like the knowledge CLI, this never touches Postgres.
 - Make targets: `mcp-install`, `mcp-test`, `mcp-run`.
 
+## Quality gate
+
+Four checks, wired to `make check` (added 2026-08-24):
+
+| Check | Tool | Scope |
+|-------|------|-------|
+| Lint (Python) | ruff 0.16.4 | `backend/` + MCP server; explicit `select` list so the gate does not shift when the pin moves |
+| Lint (SPA) | eslint 10.9 + eslint-plugin-vue 10.10 | `frontend/src/`, `flat/essential` preset, `--max-warnings 0` |
+| Type check | mypy 2.3.1 | run **twice** — backend, then the MCP server from its own venv (its `mcp` imports resolve only there) |
+| Tests | Django + pytest | 44 backend, 6 MCP |
+
+Deliberate boundaries, so a clean run is not over-read: **no formatting check** (`ruff format`/prettier out of scope; `flat/essential` rather than `flat/recommended` for the same reason); **no `django-stubs`**, so mypy checks `backend/api/` only shallowly — untyped framework imports become `Any`, and the real coverage is `knowledge_graph/` and `stdio_server/`; **no CI**, so nothing runs these but a person. `RUF012` is scoped off Django/DRF declarative `Meta` classes, where plain lists are framework convention.
+
+Config lives in `config-service/ruff.toml` and `mypy.ini` (this repo has no `pyproject.toml`) and `frontend/eslint.config.js`. mypy is pinned at the same version in two requirements files and must be bumped in both together.
+
 ## Development workflow
 
 Everyday tasks are driven by `config-service/Makefile` (run from `config-service/`; `make` alone lists all targets):
@@ -159,6 +174,7 @@ make build       # production frontend build (frontend/dist/)
 make db-destroy  # stop Postgres AND delete all data
 make knowledge-import / knowledge-validate / knowledge-lookup TERM=…   # domain knowledge graph
 make mcp-install / mcp-test / mcp-run                                  # MCP stdio server (separate venv)
+make lint / lint-fix / typecheck / check                               # quality gate (check = all four)
 ```
 
 The equivalent manual commands (docker compose / manage.py / npm directly) are documented in `config-service/README.md`.

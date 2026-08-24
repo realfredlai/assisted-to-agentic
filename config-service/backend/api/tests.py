@@ -1,7 +1,7 @@
 from django.db import IntegrityError, transaction
 from django.test import TestCase
-from rest_framework.test import APITestCase, APIClient
 from rest_framework import status
+from rest_framework.test import APIClient, APITestCase
 
 from api.models import Application, Configuration, User
 
@@ -123,9 +123,8 @@ class ConfigurationModelTest(TestCase):
 
     def test_duplicate_configuration_name_in_same_application_raises(self):
         Configuration.objects.create(application=self.app, name="default")
-        with self.assertRaises(IntegrityError):
-            with transaction.atomic():
-                Configuration.objects.create(application=self.app, name="default")
+        with self.assertRaises(IntegrityError), transaction.atomic():
+            Configuration.objects.create(application=self.app, name="default")
 
     def test_same_configuration_name_in_different_application_allowed(self):
         Configuration.objects.create(application=self.app, name="default")

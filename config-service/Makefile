@@ -14,7 +14,8 @@ MCP_VENV := $(MCP_DIR)/venv
         db-up db-down db-destroy db-status migrate makemigrations \
         test superuser shell build clean \
         knowledge-import knowledge-validate knowledge-lookup \
-        mcp-install mcp-test mcp-run
+        mcp-install mcp-test mcp-run \
+        lint lint-fix typecheck check
 
 help: ## List available targets
 	@awk 'BEGIN {FS = ":.*## "} /^[a-zA-Z_-]+:.*## / {printf "  \033[36m%-16s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
@@ -97,6 +98,25 @@ mcp-test: ## Run the MCP server test suite (pytest)
 
 mcp-run: ## Run the MCP stdio server (for MCP Inspector or manual protocol poking)
 	cd $(MCP_DIR) && venv/bin/python -m stdio_server.main
+
+## ---------- Quality gate ----------
+
+lint: ## Lint all Python (ruff) and the Vue SPA (eslint)
+	$(VENV)/bin/ruff check .
+	cd frontend && npm run lint
+
+lint-fix: ## Apply the lint fixes ruff and eslint consider safe
+	$(VENV)/bin/ruff check --fix .
+	cd frontend && npx eslint src --fix
+
+typecheck: ## Type-check both Python projects (mypy, once per project venv)
+	@echo "--- backend ---"
+	$(VENV)/bin/mypy --config-file mypy.ini backend/api backend/config backend/knowledge_graph
+	@echo "--- mcp server ---"
+	cd $(MCP_DIR) && MYPYPATH=$(CURDIR)/backend venv/bin/mypy --config-file $(CURDIR)/mypy.ini stdio_server
+
+check: lint typecheck test mcp-test ## Run the whole gate: lint + typecheck + backend tests + MCP tests (needs Docker, via test)
+	@echo "All checks passed."
 
 clean: ## Remove build artifacts, Python caches, and knowledge.db (keeps venv, node_modules, db data)
 	rm -rf frontend/dist

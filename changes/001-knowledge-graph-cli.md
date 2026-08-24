@@ -9,7 +9,7 @@
 | 1. PLAN | complete | ☑ signed off by user ("start build", 2026-08-19) |
 | 2. BUILD & ASSESS | complete | ☑ signed off by user (2026-08-19) |
 | 3. REFLECT & ADAPT | complete | ☑ signed off by user ("go for it", 2026-08-19) |
-| 4. COMMIT & PICK NEXT | **awaiting sign-off** | ☐ |
+| 4. COMMIT & PICK NEXT | complete | ☑ signed off by user ("sign off 001's stage 4", 2026-08-24) |
 
 ## Decisions
 

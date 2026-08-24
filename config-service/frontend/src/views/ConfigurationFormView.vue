@@ -90,7 +90,7 @@ export default {
       let parsed;
       try {
         parsed = JSON.parse(text);
-      } catch (e) {
+      } catch {
         return { error: "Invalid JSON" };
       }
       if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed)) {

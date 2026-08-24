@@ -1,0 +1,35 @@
+# Ruff configuration for every Python file in this repo: the Django backend
+# (backend/) and the MCP server (backend/my-domain-lang-mcp/).
+#
+# Run it with `make lint` from config-service/; `make lint-fix` applies the
+# fixes ruff considers safe. Ruff's implicit default ruleset varies between
+# releases, so `select` is listed explicitly — the gate should not change
+# meaning when the pin is bumped.
+
+line-length = 100
+target-version = "py314"
+
+exclude = [
+    "backend/venv",
+    "backend/my-domain-lang-mcp/venv",
+    "backend/api/migrations",
+]
+
+[lint]
+select = [
+    "E",    # pycodestyle errors
+    "F",    # pyflakes
+    "I",    # import sorting (isort)
+    "B",    # flake8-bugbear
+    "UP",   # pyupgrade
+    "SIM",  # flake8-simplify
+    "RUF",  # ruff-specific rules
+]
+
+[lint.per-file-ignores]
+# Django and DRF declarative inner classes (`Meta.ordering`, `Meta.fields`,
+# `read_only_fields`) are plain lists by framework convention. RUF012 wants them
+# annotated `ClassVar`, which fights the idiom for no safety gain — the rule
+# stays on everywhere else. Add new declarative modules here if they appear.
+"backend/api/models.py" = ["RUF012"]
+"backend/api/serializers.py" = ["RUF012"]

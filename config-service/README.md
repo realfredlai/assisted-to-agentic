@@ -8,6 +8,7 @@ A full stack application consisting of a Django REST Framework (DRF) backend API
 - **Frontend:** Vue.js 3.5, Vue Router 4, axios, Vite 6
 - **Database:** PostgreSQL 16 (Docker)
 - **MCP server:** official `mcp` SDK 2.0 + pytest (separate venv under `backend/my-domain-lang-mcp/`)
+- **Quality tooling:** ruff 0.16 + mypy 2.3 (Python), eslint 10 + eslint-plugin-vue 10 (SPA)
 
 ## Prerequisites
 
@@ -254,6 +255,21 @@ make mcp-run       # run the server on stdio (MCP Inspector / manual poking)
 ```
 
 Details, wire-level behaviour, and agent-registration snippet: [backend/my-domain-lang-mcp/README.md](backend/my-domain-lang-mcp/README.md).
+
+## Code Quality
+
+Lint and type checking run from `config-service/`, no Docker required:
+
+```bash
+make lint        # ruff over all Python + eslint over frontend/src
+make lint-fix    # apply the fixes ruff and eslint consider safe
+make typecheck   # mypy: backend, then the MCP server from its own venv
+make check       # the whole gate: lint + typecheck + both test suites (needs Docker)
+```
+
+Config: [ruff.toml](ruff.toml), [mypy.ini](mypy.ini), [frontend/eslint.config.js](frontend/eslint.config.js).
+
+Two limits worth knowing: without `django-stubs`, mypy treats Django's untyped imports as `Any`, so it checks `backend/api/` only shallowly — the real coverage is `knowledge_graph/` and the MCP server. And there is no formatting check (`ruff format`/prettier are deliberately not wired up; eslint uses vue's `flat/essential`, not `flat/recommended`).
 
 ## Running Tests
 

@@ -84,7 +84,7 @@ class Command(BaseCommand):
         try:
             result = import_yaml_tree(options["knowledge_dir"], storage)
         except KnowledgeImportError as exc:
-            raise CommandError(f"import failed: {exc}")
+            raise CommandError(f"import failed: {exc}") from exc
         self.stdout.write(f"imported {result.nodes_imported} nodes")
         self.stdout.write(f"imported {result.edges_imported} edge(s)")
 
@@ -104,7 +104,7 @@ class Command(BaseCommand):
             node = storage.lookup(term)
         except NodeNotFoundError:
             self.stdout.write(json.dumps({"error": "not_found", "term": term}))
-            raise CommandError(f"term not found: {term}")
+            raise CommandError(f"term not found: {term}") from None
         if options["format"] == "json":
             self.stdout.write(json.dumps(asdict(node), ensure_ascii=False))
         else:
@@ -126,7 +126,7 @@ class Command(BaseCommand):
             edges = storage.get_related(term)
         except NodeNotFoundError:
             self.stdout.write(json.dumps({"error": "not_found", "term": term}))
-            raise CommandError(f"term not found: {term}")
+            raise CommandError(f"term not found: {term}") from None
         payload = [
             {"from": e.from_node, "to": e.to_node, "relationship": e.relationship}
             for e in edges

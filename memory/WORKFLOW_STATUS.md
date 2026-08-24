@@ -57,10 +57,14 @@ Implement and validate.
   |-------|---------|--------|
   | Tests (backend) | `make test` | ✅ configured — 44 tests |
   | Tests (MCP server) | `make mcp-test` | ✅ configured — 6 tests (pytest) |
-  | Linting | `make lint` | ⏳ not yet — planned |
-  | Type checking | `make typecheck` | ⏳ not yet — planned |
+  | Linting | `make lint` | ✅ configured — ruff (all Python) + eslint (`frontend/src/`) |
+  | Type checking | `make typecheck` | ✅ configured — mypy, **backend + MCP server**. Caveat: without `django-stubs` it barely checks `backend/api/` (untyped imports become `Any`); real coverage is `knowledge_graph/` and the MCP server. |
 
-  Run everything marked ✅ and report its output. Never report a ⏳ check as passing — it does not exist yet. **When tooling is added, move its row to ✅ and it becomes part of this gate automatically** (see [Open decisions](#open-decisions) for the full checklist of what to update).
+  `make check` runs all four in one command (and needs Docker, because `make test` does).
+
+  **A work item that adds a check must demonstrate that check failing.** Introduce a defect the new check should catch, record the non-zero exit, revert it. A misconfigured check and a genuinely clean codebase are indistinguishable from a passing run alone — this rule is why 003 could claim a working gate rather than a hopeful one.
+
+  **All four are configured — run every one and paste its real output.** `make check` is the single command. Read the type-checking caveat before citing a clean mypy run as evidence about `backend/api/`. If a future check is added in a ⏳ state, the same rule applies: never report one that does not exist.
 
 ### 3. REFLECT & ADAPT
 
@@ -116,15 +120,23 @@ After the purge a work item keeps only: title, number, and goal; the acceptance 
 
 ## Active work item
 
-- **Work item:** [`changes/002-mcp-stdio-server.md`](../changes/002-mcp-stdio-server.md) — MCP stdio server, Phase 1: handshake only, zero tools/resources/prompts, at `config-service/backend/my-domain-lang-mcp/`
-- **Stage:** 4 COMMIT & PICK NEXT — **awaiting final sign-off**. Committed `c602243` (feat, full stage notes intact) + purge follow-up; docs updated in-commit; 6/6 + 44/44 green at close.
-- **Loose end:** [`changes/001`](../changes/001-knowledge-graph-cli.md) stage 4 still shows *awaiting final sign-off* — committed and purged, only the user's closing word is missing.
+**Two work items are in flight, both at stage 1 — PLAN, awaiting sign-off** (the user asked for both on 2026-08-24; that instruction also carries the dependency approval 003 was blocked on).
+
+- [`changes/003-lint-and-typecheck.md`](../changes/003-lint-and-typecheck.md) — make the BUILD & ASSESS gate real: ruff + mypy + eslint, `make lint` / `typecheck` / `check`.
+- [`changes/004-mcp-knowledge-tools.md`](../changes/004-mcp-knowledge-tools.md) — MCP Phase 2: expose the knowledge graph as four tools via direct import of `knowledge_graph.storage`.
+
+**Proposed order: 003 first, then 004** — so 004's new code is written under a real gate and the existing-violation cleanup happens once rather than twice. The user listed them the other way round; this is a proposal, freely reversible at sign-off (the numbering follows the proposed order, nothing else depends on it).
+
+Cross-dependencies to keep in view:
+
+- 004 replaces work item 002's AC2 test (`test_no_tools_resources_or_prompts`) by design — noted in 004 under *Deliberate invalidation*.
+- **The two items touch at one point:** 004's `tools.py` needs a `sys.path.insert` before importing `knowledge_graph.storage`, which trips ruff **E402** and defeats mypy's import resolution (both measured). Whichever item is built **first** owns the fix — inline `# noqa: E402` plus `mypy_path` in `mypy.ini`. Written into 003's plan on the assumption it goes first; flagged in 004 for the reverse. Without it, 003 signs off green and 004 breaks the gate the next day.
 
 ## Current position
 
 - **Branch:** `main` (tracks `origin/main`); no feature branches open — merged branches are deleted after fast-forward.
 - **Health:** backend tests 44/44 green + MCP suite 6/6 green, verified 2026-08-21; `make up` end-to-end verified 2026-08-03.
-- **Uncommitted:** nothing from the workflow.
+- **Uncommitted:** the 003 + 004 PLAN artifacts (two work items, this file, journal entry 23) — they commit at each item's stage 4 per the process.
 
 ## Completed work
 
@@ -143,17 +155,7 @@ Predates the `changes/` convention — the record is the journal entries and com
 
 ## Open decisions
 
-- **Lint and type checking — planned, not yet configured.** The user intends to add them in the near future; until then the BUILD & ASSESS gate runs tests only. Likely shape: `ruff` (+ optionally `mypy`) for the backend, `eslint` for the frontend. These are new dependencies, so the addition still needs explicit approval when it happens.
-
-  When the tooling lands, update all four in the same change:
-  1. `config-service/backend/requirements.txt` and/or `frontend/package.json`
-  2. `config-service/Makefile` — add `make lint` / `make typecheck`, and wire them into `make test` or a `make check` aggregate if that is the preference
-  3. `memory/ENV_SCRIPTS.md` — replace the "not configured" section with the real commands
-  4. This file — flip the ⏳ rows to ✅ in the BUILD & ASSESS gate above, and delete this decision
-
-  Same applies to **CI**, which also does not exist yet: if a pipeline is added, document it in `ENV_SCRIPTS.md` under Environments and say which checks it runs.
+- **CI still does not exist.** Lint and type checking now run locally (003), but nothing runs them automatically. If a pipeline is added, document it in `ENV_SCRIPTS.md` under Environments and say which checks it runs.
 - `JOURNAL.md` entries 1–4 still carry "[enter after the run completes]" in Cost/Reflections (entries 2–4 also omit Tool/Model) — backfill or leave, your call.
 - No seed-data fixture; an empty database shows "No users found." until records are created via the API or admin.
-- **Next work item — two candidates queued** (number assigned at pick):
-  1. **MCP Phase 2** — expose `backend/knowledge_graph` as MCP tools (lookup/related/list-areas/validate) via direct import (its modules are Django-free). The user's stated roadmap for the MCP server.
-  2. **lint-and-typecheck** — make the BUILD & ASSESS gate real (ruff/mypy/eslint + make targets); needs dependency approval, then a PLAN.
+- **Deferred inside 003, worth revisiting later:** code formatting (`ruff format` / prettier — a large mechanical diff, kept out so it cannot bury substantive fixes) and `django-stubs` + strict mypy (without stubs, mypy barely checks Django code; the gate row records that rather than overclaiming).

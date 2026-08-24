@@ -27,7 +27,7 @@ Read at the start of each conversation; load selectively as the task requires.
 
 - Run everyday tasks through `config-service/Makefile` (`make up`, `make test`, …) rather than raw docker/`manage.py`/npm commands. `memory/ENV_SCRIPTS.md` says when going off-script is appropriate.
 - Do not add dependencies without approval.
-- Lint/type-check tooling and CI are planned but do not exist yet — run and report every check that *is* configured (`make test`), and never report one that isn't.
+- The gate is `make check` — lint, type check, backend tests, MCP tests. Run it and report the real output; never claim a check you did not run. Two honest limits to keep in mind: **CI does not exist** (nothing runs these but you), and **mypy without `django-stubs` barely checks `backend/api/`**, so a clean run is not evidence that Django code is type-safe.
 - Never destroy data (`make db-destroy`, dropping volumes or tables) without explicit permission.
 - Keep docs current in the same commit as the change they describe.
 - When coding against a third-party SDK or protocol, verify behaviour empirically first (inspect signatures, probe wire-level responses) rather than trusting docs or model memory — and for protocol conformance, the spec is the source of truth: an SDK's behaviour is evidence of its implementation, not of the contract. (Added after work item 002, where mcp 2.0.0 both diverged from its docs and deviated from the MCP spec.)
