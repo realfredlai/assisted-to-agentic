@@ -4,7 +4,7 @@ __pycache__/
 *$py.class
 *.so
 backend/venv/
-backend/my-domain-lang-mcp/venv/
+my-domain-lang-mcp/venv/
 *.egg-info/
 dist/
 build/

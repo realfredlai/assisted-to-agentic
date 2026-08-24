@@ -95,11 +95,11 @@ Run every target from `config-service/`. `make` with no arguments lists them all
 
 ### MCP server (no Docker needed)
 
-`backend/my-domain-lang-mcp/` is a **separate pip/venv project** with its own `venv/` and `requirements.txt` (exact pins: `mcp`, `pytest`, `pytest-asyncio`, `mypy`) — `make install` / `make test` do **not** cover it. Its tests are pytest, not Django.
+`my-domain-lang-mcp/` — a sibling of `backend/` and `frontend/`, not part of the Django project — is a **separate pip/venv project** with its own `venv/` and `requirements.txt` (exact pins: `mcp`, `pytest`, `pytest-asyncio`, `mypy`) — `make install` / `make test` do **not** cover it. Its tests are pytest, not Django.
 
 | Command | What it does |
 |---------|--------------|
-| `make mcp-install` | Create `backend/my-domain-lang-mcp/venv` (if missing) and install its dependencies. Idempotent. |
+| `make mcp-install` | Create `my-domain-lang-mcp/venv` (if missing) and install its dependencies. Idempotent. |
 | `make mcp-test` | Run the MCP server pytest suite — 18 tests as of 2026-08-24. Hermetic: passes with Docker stopped and `knowledge.db` absent |
 | `make mcp-run` | Run the stdio server in the foreground (for MCP Inspector or manual JSON-RPC poking); Ctrl+C or stdin EOF stops it cleanly. Exposes four knowledge-graph tools; run `make knowledge-import` first or they report an unbuilt graph |
 
@@ -132,7 +132,7 @@ Config lives in `config-service/ruff.toml` and `config-service/mypy.ini` (this r
 - **The frontend has no type checking** — there is no TypeScript in this project, so `make typecheck` is Python-only.
 - **Still no CI.** These run when someone runs them.
 
-`ruff.toml` pins an explicit `select` list because ruff's implicit defaults shift between releases; both tools are pinned exactly, and **mypy is pinned at the same version in two requirements files** (`backend/` and `backend/my-domain-lang-mcp/`) — change them together.
+`ruff.toml` pins an explicit `select` list because ruff's implicit defaults shift between releases; both tools are pinned exactly, and **mypy is pinned at the same version in two requirements files** (`backend/` and `my-domain-lang-mcp/`) — change them together.
 
 ### Smoke checks
 

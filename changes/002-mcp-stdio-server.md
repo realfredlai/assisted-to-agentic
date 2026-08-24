@@ -18,7 +18,7 @@
 | Language + SDK | Python, official `mcp` SDK v2 — `mcp==2.0.0`, user-approved. Reference (v1 `FastMCP` API) studied for shape, written in v2 idioms. |
 | Dependency management | pip + venv + requirements.txt (user-chosen over recommended uv); exact pins; own venv; no console script — runs as `python -m stdio_server.main`. |
 | Test dependencies | `pytest==9.1.1` + `pytest-asyncio==1.4.0` (approved with PLAN sign-off). |
-| Location + layout | `backend/my-domain-lang-mcp/` per instruction; inner package `stdio_server/` (hyphens invalid in module names; room for an `http_server` sibling; Phase-2 `knowledge_graph` import is why it lives in `backend/`). |
+| Location + layout | `backend/my-domain-lang-mcp/` per instruction; inner package `stdio_server/` (hyphens invalid in module names; room for an `http_server` sibling). **Superseded:** [005](005-mcp-server-sibling-layout.md) moved it to `config-service/my-domain-lang-mcp/`, a peer of `backend/`. The reasoning recorded here — that the Phase-2 import is why it lived in `backend/` — was wrong: the import needs a correct relative path, not nesting. |
 | Protocol-layer error handling | stderr-only logging; clean exit 0 on EOF/SIGINT, log-and-exit-1 otherwise; JSON-RPC errors for unknown methods (`-32601`) and unknown tools (`-32602` via `unknown_tool_guard` middleware — mcp 2.0.0 deviates from spec Tools § Error Handling by answering `isError` results; corrected after the user's spec review). Middleware API is SDK-"provisional" — safe under the exact pin; re-verify at upgrade (recorded in ARCHITECTURE.md). |
 
 ## Acceptance criteria — all met

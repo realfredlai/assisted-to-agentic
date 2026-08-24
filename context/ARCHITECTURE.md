@@ -112,7 +112,7 @@ No pagination, filtering, throttling, or auth is configured (`REST_FRAMEWORK` se
   - `ApplicationAPITest` (9): list ordering, create (valid / duplicate name / invalid `app_type` / with users / unknown user id), retrieve, patch `users`, delete cascades its configurations.
   - `ConfigurationAPITest` (10): nested list scoped to its application, create (settings default / non-object settings rejected / duplicate name / same name under another application), retrieve, update via PUT and PATCH, delete, unknown application id 404s list and create, configuration id under the wrong application 404s.
 - Run: `cd config-service/backend && source venv/bin/activate && python manage.py test` — requires the Postgres container up (tests create/destroy a `test_config_service_db`).
-- The MCP server has its own 18-test pytest suite (`make mcp-test`, separate venv, no Postgres) — see [MCP server](#mcp-server-backendmy-domain-lang-mcp) below.
+- The MCP server has its own 18-test pytest suite (`make mcp-test`, separate venv, no Postgres) — see [MCP server](#mcp-server-config-servicemy-domain-lang-mcp) below.
 
 ## Knowledge graph
 
@@ -133,7 +133,7 @@ config-service/knowledge.db       ← SQLite, gitignored, rebuilt at will
 - Each node's `warnings` carry the sharp edges (e.g. `User` is not an auth account; `application` comes from the URL, never the body; there is no Environment entity).
 - New dependency: PyYAML (approved). Make targets: `knowledge-import`, `knowledge-validate`, `knowledge-lookup TERM=…`.
 
-## MCP server (`backend/my-domain-lang-mcp/`)
+## MCP server (`config-service/my-domain-lang-mcp/`)
 
 A stdio-transport MCP server on the official Python SDK (`mcp==2.0.0` — the v2 major: `MCPServer`, unified `Client`), modelled on the Module 5 `domain-lang-mcp` reference but written in v2 idioms (the reference uses the v1 `FastMCP` API). It exposes the knowledge graph to a coding agent as four tools, so an agent can ask what a domain word means here rather than assuming its ordinary meaning.
 
@@ -149,8 +149,9 @@ knowledge/*.yaml ──make knowledge-import──► knowledge.db ──direct 
 | `list_domain_areas` | the distinct areas |
 | `validate_knowledge_graph` | `{valid, issues}` — edges pointing at missing nodes |
 
-- **Direct import, not subprocess.** `knowledge_graph/storage.py` is pure stdlib, so the server imports it via a `sys.path` seam rather than shelling out to `manage.py knowledge` and parsing stdout — one failure mode instead of three, and typed results. That is why the project sits inside `backend/`. `importer.py` is deliberately *not* imported: it needs PyYAML, and the server is a reader.
-- **Two seams:** `sys.path` gains `backend/`; the database path defaults to `config-service/knowledge.db` and is overridden by `KNOWLEDGE_DB`, which is what keeps the tests hermetic.
+- **A peer of `backend/` and `frontend/`, not part of the Django project.** It has its own venv and `requirements.txt`, is not a Django app, and `manage.py` knows nothing about it. (It briefly lived under `backend/`; that nesting was never required by the import — only a correct relative path is.)
+- **Direct import, not subprocess.** `knowledge_graph/storage.py` is pure stdlib, so the server imports it via a `sys.path` seam pointing at the sibling `backend/`, rather than shelling out to `manage.py knowledge` and parsing stdout — one failure mode instead of three, and typed results. `importer.py` is deliberately *not* imported: it needs PyYAML, and the server is a reader.
+- **Two seams:** `sys.path` gains the sibling `backend/`; the database path defaults to `config-service/knowledge.db` and is overridden by `KNOWLEDGE_DB`, which is what keeps the tests hermetic.
 - **Missing graph is handled, not leaked.** `sqlite3.connect()` *creates* a file for a missing path, so a naive read would litter an empty database and then fail with `no such table`. Existence is checked first; both that and `OperationalError` become errors naming the path and `make knowledge-import`.
 - **Error channels follow the spec, which the SDK does not.** Unknown tool and invalid arguments are JSON-RPC protocol errors (`-32602`) via `spec_conformance_guard`; unknown term and unbuilt graph are `isError` results carrying text a model can act on. The guard validates against each tool's `input_schema`, and since the SDK does not coerce arguments it rejects exactly what the SDK would reject — only the channel changes. **Caveat:** the SDK marks the middleware signature "provisional"; re-verify at any upgrade beyond the exact `mcp==2.0.0` pin.
 - **Structured output.** Tools return `TypedDict`s, so each ships a real `outputSchema` and `structuredContent` — no string-parsing on the client. (A bare `dict` return yields neither; that was measured.)

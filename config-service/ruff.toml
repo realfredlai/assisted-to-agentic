@@ -1,5 +1,5 @@
 # Ruff configuration for every Python file in this repo: the Django backend
-# (backend/) and the MCP server (backend/my-domain-lang-mcp/).
+# (backend/) and the MCP server (my-domain-lang-mcp/), which are siblings.
 #
 # Run it with `make lint` from config-service/; `make lint-fix` applies the
 # fixes ruff considers safe. Ruff's implicit default ruleset varies between
@@ -11,7 +11,7 @@ target-version = "py314"
 
 exclude = [
     "backend/venv",
-    "backend/my-domain-lang-mcp/venv",
+    "my-domain-lang-mcp/venv",
     "backend/api/migrations",
 ]
 

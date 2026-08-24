@@ -7,7 +7,7 @@ A full stack application consisting of a Django REST Framework (DRF) backend API
 - **Backend:** Python 3.14, Django 5.2, Django REST Framework 3.17, django-cors-headers 4.9, PyYAML 6.0
 - **Frontend:** Vue.js 3.5, Vue Router 4, axios, Vite 6
 - **Database:** PostgreSQL 16 (Docker)
-- **MCP server:** official `mcp` SDK 2.0 + pytest (separate venv under `backend/my-domain-lang-mcp/`)
+- **MCP server:** official `mcp` SDK 2.0 + pytest (separate venv under `my-domain-lang-mcp/`)
 - **Quality tooling:** ruff 0.16 + mypy 2.3 (Python), eslint 10 + eslint-plugin-vue 10 (SPA)
 
 ## Prerequisites
@@ -35,9 +35,10 @@ config-service/
 │       ├── urls.py             # API routing (/api/users/, /api/applications/, nested configurations)
 │       ├── tests.py            # 34 tests (model + API)
 │       └── migrations/         # Database migrations
-│   ├── knowledge_graph/        # Knowledge graph app (storage, importer, manage.py knowledge CLI, 10 tests)
-│   └── my-domain-lang-mcp/     # MCP stdio server (own venv + requirements.txt; 4 knowledge tools, 18 pytest tests)
+│   └── knowledge_graph/        # Knowledge graph app (storage, importer, manage.py knowledge CLI, 10 tests)
 ├── knowledge/                  # Domain knowledge YAML (nodes/ + edges/; source of truth: context/DOMAIN.md)
+├── my-domain-lang-mcp/         # MCP stdio server — a peer of backend/ and frontend/, with its own venv
+│   └── stdio_server/           # 4 knowledge tools, 18 pytest tests
 └── frontend/
     ├── package.json            # Node dependencies
     ├── vite.config.js          # Vite build config
@@ -246,7 +247,7 @@ The YAML is a projection of `context/DOMAIN.md` — if they disagree, DOMAIN.md 
 
 ## MCP Server
 
-`backend/my-domain-lang-mcp/` is a stdio-transport MCP server on the official Python SDK (`mcp` 2.x) that exposes the knowledge graph to a coding agent as four tools — `lookup_term`, `get_related_terms`, `list_domain_areas`, `validate_knowledge_graph`. It reads the graph by importing `knowledge_graph.storage` directly (pure stdlib, no Django), and is a separate pip/venv project with its own exact-pinned `requirements.txt`. Docker-free:
+`my-domain-lang-mcp/` — a peer of `backend/` and `frontend/`, not part of the Django project — is a stdio-transport MCP server on the official Python SDK (`mcp` 2.x) that exposes the knowledge graph to a coding agent as four tools — `lookup_term`, `get_related_terms`, `list_domain_areas`, `validate_knowledge_graph`. It reads the graph by importing `knowledge_graph.storage` directly (pure stdlib, no Django), and is a separate pip/venv project with its own exact-pinned `requirements.txt`. Docker-free:
 
 ```bash
 make mcp-install   # create its venv + install dependencies
@@ -256,7 +257,7 @@ make mcp-run       # run the server on stdio (MCP Inspector / manual poking)
 
 Run `make knowledge-import` first, or the tools will report that the graph has not been built. Set `KNOWLEDGE_DB` to point at a different graph file.
 
-Tool table, error-channel semantics, and the agent-registration snippet: [backend/my-domain-lang-mcp/README.md](backend/my-domain-lang-mcp/README.md).
+Tool table, error-channel semantics, and the agent-registration snippet: [my-domain-lang-mcp/README.md](my-domain-lang-mcp/README.md).
 
 ## Code Quality
 

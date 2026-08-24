@@ -17,7 +17,9 @@ Read-only. The graph is rebuilt from YAML by `make knowledge-import`, which need
 
 ## How it reaches the graph
 
-It **imports `backend/knowledge_graph.storage` directly**. That module is pure stdlib (sqlite3 + json + pathlib), so no Django and no PyYAML are involved, and the server gets typed objects instead of re-parsed subprocess stdout. This is why the project lives inside `backend/`.
+It **imports `backend/knowledge_graph.storage` directly** through a `sys.path` seam pointing at the sibling `backend/`. That module is pure stdlib (sqlite3 + json + pathlib), so no Django and no PyYAML are involved, and the server gets typed objects instead of re-parsed subprocess stdout.
+
+This project is a **peer of `backend/` and `frontend/`**, not part of the Django project: its own venv, its own dependencies, and `manage.py` knows nothing about it. (It briefly lived under `backend/`; the nesting was never what made the import work.)
 
 The database path defaults to `config-service/knowledge.db` and is overridden by **`KNOWLEDGE_DB`** — which is how the tests point at temporary graphs without touching the real file. If the graph has not been built, every tool returns an actionable error naming the path and the fix rather than a bare sqlite failure (and, importantly, without leaving an empty database file behind).
 
@@ -67,7 +69,7 @@ The test suite is hermetic: it builds its own graphs in-process with `Storage` a
 ## Poking it with MCP Inspector
 
 ```bash
-cd backend/my-domain-lang-mcp
+cd my-domain-lang-mcp
 npx @modelcontextprotocol/inspector -- venv/bin/python -m stdio_server.main
 ```
 

@@ -15,7 +15,7 @@
 
 | Decision | Choice |
 |----------|--------|
-| Backend access | **Direct import** of `knowledge_graph.storage` through a `sys.path` seam — it is pure stdlib, so no Django or PyYAML enters this venv. The reference's subprocess-and-parse-stdout approach has three failure modes for data reachable in-process. `importer.py` is never imported: this server is a reader. |
+| Backend access | **Direct import** of `knowledge_graph.storage` through a `sys.path` seam (pointing at the sibling `backend/` since [005](005-mcp-server-sibling-layout.md) moved this project out of it) — it is pure stdlib, so no Django or PyYAML enters this venv. The reference's subprocess-and-parse-stdout approach has three failure modes for data reachable in-process. `importer.py` is never imported: this server is a reader. |
 | Tool surface | Four — `lookup_term`, `get_related_terms`, `list_domain_areas`, `validate_knowledge_graph`. The reference's `ping` is dropped: every listed tool is context an agent pays for on every call. |
 | Return types | `TypedDict`, which yields a real `outputSchema` + `structuredContent` (a bare `dict` yields neither — measured). `get_related_terms` adds the target's `to_name` so an agent needn't issue one lookup per edge. |
 | Database path | Defaults to `config-service/knowledge.db`; **`KNOWLEDGE_DB`** overrides it — the seam that keeps the tests hermetic. |

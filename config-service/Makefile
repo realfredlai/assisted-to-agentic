@@ -5,7 +5,7 @@ SHELL := /bin/bash
 PYTHON3 ?= python3
 VENV := backend/venv
 MANAGE := cd backend && venv/bin/python manage.py
-MCP_DIR := backend/my-domain-lang-mcp
+MCP_DIR := my-domain-lang-mcp
 MCP_VENV := $(MCP_DIR)/venv
 
 .DEFAULT_GOAL := help

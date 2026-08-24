@@ -4,14 +4,14 @@ The graph lives in `backend/knowledge_graph`, whose `storage` module is pure
 stdlib (sqlite3 + json + pathlib) — no Django, no PyYAML. So this server reads
 it by **importing it directly** rather than shelling out to `manage.py
 knowledge` and parsing stdout: one failure mode instead of three, and typed
-results instead of re-parsed JSON. That is why the MCP project lives inside
-`backend/`.
+results instead of re-parsed JSON. This project is a sibling of `backend/`,
+not part of it — the import needs a correct relative path, not nesting.
 
 Read-only by design. Rebuilding the graph stays a `make knowledge-import` job,
 which needs PyYAML and Django; this venv has neither.
 
 Two seams keep it testable and zero-config:
-  * `sys.path` gains `backend/` so `knowledge_graph` is importable;
+  * `sys.path` gains the sibling `backend/` so `knowledge_graph` is importable;
   * the database path defaults next to the shipped one, and `KNOWLEDGE_DB`
     overrides it — which is how the tests point at temporary graphs without
     touching the real file.
@@ -29,7 +29,8 @@ from typing import TypedDict
 
 from mcp.server.mcpserver.exceptions import ToolError
 
-_BACKEND = Path(__file__).resolve().parents[2]
+_CONFIG_SERVICE = Path(__file__).resolve().parents[2]
+_BACKEND = _CONFIG_SERVICE / "backend"
 if str(_BACKEND) not in sys.path:
     sys.path.insert(0, str(_BACKEND))
 
@@ -38,7 +39,7 @@ if str(_BACKEND) not in sys.path:
 from knowledge_graph.storage import NodeNotFoundError, Storage  # noqa: E402
 
 #: Where `make knowledge-import` writes the graph: config-service/knowledge.db.
-DEFAULT_DB = _BACKEND.parent / "knowledge.db"
+DEFAULT_DB = _CONFIG_SERVICE / "knowledge.db"
 
 _REBUILD_HINT = "Build it from config-service/ with: make knowledge-import"
 
